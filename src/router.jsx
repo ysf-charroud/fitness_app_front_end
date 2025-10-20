@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import Home from "./page/Home";
+
 import Login from "./page/Login";
 import Register from "./page/Register";
 import VerifyEmail from "./page/VerifyEmail";
@@ -11,6 +12,11 @@ import AdminDashboard from "./page/dashboard/Admin";
 import CoachDashboard from "./page/dashboard/Coach";
 import GymDashboard from "./page/dashboard/Gym";
 import AthleteDashboard from "./page/dashboard/Athlete";
+
+import CreateProgramPage from "./page/CreateProgramPage";
+import MainLayout from "./layout/MainLayout";
+
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -25,6 +31,7 @@ const router = createBrowserRouter([
     element: <ForgotPassword />
   },
   {
+
     path: "/reset-password/:token",
     element: <ResetPassword />
   },
@@ -63,6 +70,25 @@ const router = createBrowserRouter([
     path: "/reset-password",
     element: <ResetPassword />
   }
+
+    element: <MainLayout />,
+    children: [
+      {
+        path: "coach",
+        children: [
+          {
+            path: "program/create",
+            element: <CreateProgramPage />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: "*",
+    element: <div>404 not found</div>,
+  },
+
 ]);
 
 export default router;

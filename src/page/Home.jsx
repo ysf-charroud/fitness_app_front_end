@@ -20,6 +20,8 @@ import {
 from "@/components/ui/dialog";
 import Login from "../page/Login";
 import React from "react";
+import { Badge } from "@/components/ui/badge"
+
 
 const Home = () => {
   return (
@@ -33,30 +35,7 @@ const Home = () => {
           Register here
         </Link><br />
       <Button onClick={() => alert("working")}>click me</Button>
-      <div>
-      <DropdownMenu>
-        <DropdownMenuTrigger>Login</DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>access your Account</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-         <Dialog>
-        <DialogTrigger>Athlete</DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
-            <DialogDescription>
-              <Login/>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-          <DropdownMenuItem>Coach</DropdownMenuItem>
-          <DropdownMenuItem>Admin</DropdownMenuItem>
-          <DropdownMenuItem>Gym</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-     
-      </div>
+      <Badge variant={"secondary"} >99</Badge>
     </div>
   );
 };
