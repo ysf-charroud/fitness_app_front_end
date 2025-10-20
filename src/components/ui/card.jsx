@@ -1,9 +1,29 @@
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
 
 function Card({
   className,
+  // optional size: sm | md | lg | xl | full
+  size = "",
+  ...props
+}) {
+  const sizeClass = (() => {
+    switch (size) {
+      case "sm":
+        return "max-w-sm";
+      case "md":
+        return "max-w-md";
+      case "lg":
+        return "max-w-lg";
+      case "xl":
+        return "max-w-xl";
+      case "full":
+        return "w-full";
+      default:
+        return "";
+    }
+  })();
+
   ...props
 }) {
   return (
@@ -11,6 +31,10 @@ function Card({
       data-slot="card"
       className={cn(
         "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+
+        sizeClass,
+
+
         className
       )}
       {...props} />
