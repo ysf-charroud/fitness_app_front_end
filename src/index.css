@@ -16,7 +16,6 @@
   --text-muted: var(--color-neutral-400);
   --text-success: var(--color-green-500);
   --text-danger: var(--color-red-500);
-  --text-muted: var(--color-blue-500);
 
   /* Surface */
   --surface-primary: var(--color-neutral-200);
@@ -69,6 +68,9 @@
   --shadow-d-md: inset 0 7px 4px oklch(100% 0 0 / 0.1),
     0 4px 2px oklch(0% 0 0 / 0.25), 0 7px 14px oklch(0% 0 0 / 0.25);
 
+    --shadow-r-l: var(--color-neutral-700);
+    --shadow-r-m: var(--color-neutral-600);
+    --shadow-r-h: var(--color-neutral-500);
 }
 
 .dark {
@@ -138,7 +140,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--surface-background);
-  --color-foreground: var(--text-primary);
+  --color-foreground: var(--text-secondary);
   --color-card: var(--surface-l);
   --color-card-foreground: var(--text-secondary);
   --color-popover: var(--surface-h);
@@ -153,14 +155,14 @@
   --color-accent-foreground: var(--text-accent);
   --color-destructive: red;
   --color-border: var(--border-l);
-  --color-input: var(--surface-l);
-  --color-ring: red;
+  --color-input: var(--border-l);
+  --color-ring: var(--shadow-r-m);
   --color-chart-1: red;
   --color-chart-2: yellow;
   --color-chart-3: red;
   --color-chart-4: yellow;
   --color-chart-5: red;
-  --color-sidebar: var(--surface-h);
+  --color-sidebar: var(--surface-l);
   --color-sidebar-foreground: var(--text-secondary);
   --color-sidebar-primary: var(--surface-primary);
   --color-sidebar-primary-foreground: var(--text-primary);
@@ -169,7 +171,9 @@
   --color-sidebar-border: var(--border-m);
   --color-sidebar-ring: red;
 }
-
+.dd {
+  border: 1px solid red !important;
+}
 @layer base {
   * {
     @apply border-border outline-ring/50;
