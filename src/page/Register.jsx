@@ -1,4 +1,6 @@
 import { useState } from "react";
+//alert
+import Swal from 'sweetalert2';
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -68,11 +70,20 @@ function Register() {
         res?.data?.message ||
         "A verification code has been sent to your email. Please verify your account.";
       setSuccessMessage(msg);
-      resetForm();
-
+     resetForm();
       localStorage.setItem("verifyEmail", payload.email);
-      const qEmail = encodeURIComponent(payload.email || "");
-      navigate(`/verify-email?email=${qEmail}`);
+
+      Swal.fire({
+        timer: 3000,
+        title: "Registration Successful!",
+        text: "A verification code has been sent to your email. Please verify your account.",
+        icon: "success",
+        draggable: true,
+        confirmButtonText: "OK"
+      }).then(() => {
+        const qEmail = encodeURIComponent(payload.email || "");
+        navigate(`/verify-email?email=${qEmail}`);
+      });
     } catch (err) {
       const resp = err?.response;
       setFieldErrors({});
@@ -212,6 +223,7 @@ function Register() {
           <SelectItem value="gym">Gym</SelectItem>
         </SelectContent>
       </Select>
+     
 
             </div>
 

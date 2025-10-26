@@ -8,5 +8,6 @@ import store from "./services/redux/store";
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
     <RouterProvider router={router} />
-  </Provider>
+{/*     <Route path="/dashboard/Admin" element={<PrivateRoute allowedRoles={['admin']}><Admin /></PrivateRoute>} />
+ */}  </Provider>
 );
