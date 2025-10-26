@@ -1,30 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} 
-from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} 
-from "@/components/ui/dialog";
-import Login from "../page/Login";
+
 import React from "react";
 import { Badge } from "@/components/ui/badge"
 
 
 const Home = () => {
-  return (
+  return (  
     <div>
       Home
       <p>shacn button</p>

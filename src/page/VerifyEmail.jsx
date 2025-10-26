@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import api from "@/services/axios/axiosClient";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp"
+
 
 // Utility: format seconds into mm:ss
 function formatTime(sec) {
@@ -166,41 +173,68 @@ export default function VerifyEmail() {
           <div className="text-sm text-muted-foreground">{email}</div>
         </div>
 
-        <form onSubmit={handleVerify} className="flex flex-col gap-3">
-          <div>
-            <Label htmlFor="code">Verification Code</Label>
-            <Input
-              id="code"
-              name="code"
-              placeholder="Enter 6-digit code"
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
-              maxLength={6}
-              required
-            />
-          </div>
+       <form onSubmit={handleVerify} className="flex flex-col gap-3">
+  <div>
+    <Label htmlFor="code" className="mb-2">Verification Code</Label>
 
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            {timer > 0 ? (
-              <span>Code expires in {formatTime(timer)}</span>
-            ) : (
-              <span className="text-destructive">Code expired. Please resend a new one.</span>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={resendLoading || resendCooldown > 0}
-              onClick={handleResend}
-            >
-              {resendLoading ? "Sending…" : resendCooldown > 0 ? `Resend (${resendCooldown}s)` : "Resend code"}
-            </Button>
-          </div>
+    {/* ✅ Single OTP input, no groups or separators */}
+     <InputOTP
+      className="scale-110 tracking-widest"
+      id="code"
+      name="code"
+      maxLength={6}
+      value={code}
+      onChange={(value) => setCode(value.replace(/[^0-9]/g, "").slice(0, 6))}
+      required
+    >
+      <InputOTPGroup>
+        <InputOTPSlot index={0} />
+        <InputOTPSlot index={1} />
+        <InputOTPSlot index={2} />
+      </InputOTPGroup>
 
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Verifying…" : "Verify"}
-          </Button>
-        </form>
+      <InputOTPSeparator />
+
+      <InputOTPGroup>
+        <InputOTPSlot index={3} />
+        <InputOTPSlot index={4} />
+        <InputOTPSlot index={5} />
+      </InputOTPGroup>
+    </InputOTP>
+    </div>
+
+  <div className="flex items-center justify-between text-sm text-muted-foreground">
+    {timer > 0 ? (
+      <span>Code expires in {formatTime(timer)}</span>
+    ) : (
+      <span className="text-destructive">
+        Code expired. Please resend a new one.
+      </span>
+    )}
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      disabled={resendLoading || resendCooldown > 0}
+      onClick={handleResend}
+    >
+      {resendLoading
+        ? "Sending…"
+        : resendCooldown > 0
+        ? `Resend (${resendCooldown}s)`
+        : "Resend code"}
+    </Button>
+  </div>
+
+  <Button
+    type="submit"
+    disabled={loading || code.length !== 6}
+    className="w-full"
+  >
+    {loading ? "Verifying…" : "Verify"}
+  </Button>
+</form>
+
       </div>
     </div>
   );
