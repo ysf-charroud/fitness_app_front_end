@@ -84,7 +84,7 @@
   --text-muted: var(--color-neutral-400);
   --text-success: var(--color-green-500);
   --text-danger: var(--color-red-500);
-  --text-muted: var(--color-blue-500);
+  --text-muted: var(--color-neutral-500);
 
   /* Surface */
   --surface-primary: var(--color-neutral-200);
@@ -171,7 +171,7 @@
   --color-sidebar-border: var(--border-m);
   --color-sidebar-ring: red;
 }
-.dd {
+.xxx {
   border: 1px solid red !important;
 }
 @layer base {

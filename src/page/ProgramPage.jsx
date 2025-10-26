@@ -122,7 +122,7 @@ export default function ProgramPage() {
   };
 
   return (
-      <div className="w-full px-6 pt-8 dd overflow-y-scroll">
+      <div className="w-full px-6 pt-8 overflow-y-scroll">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
