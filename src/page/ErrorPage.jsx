@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Typography, Button } from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
+import {Button} from "@/components/ui/button";
 import { FlagIcon } from "@heroicons/react/24/solid";
 
 export function ErrorSection7() {

@@ -39,13 +39,13 @@ export function LoginForm({ className/* , ...props */ }) {
     const response = await axios.post(
       `${import.meta.env.VITE_API_ORIGIN}/api/auth/login`,
       { email, password },
-      { withCredentials: true } // ✅ allow backend to set HttpOnly cookie
+      { withCredentials: true } //  allow backend to set HttpOnly cookie
     );
 
-    // ✅ Access Token returned in JSON
+    //  Access Token returned in JSON
     const { accessToken, user } = response.data;
 
-    // ✅ Check if account is deactivated
+    //  Check if account is desactivated
     if (user && user.isActive === false) {
       navigate("/error");
       //setServerErrors(["This account is not found. Please register a new one."]);
@@ -53,13 +53,13 @@ export function LoginForm({ className/* , ...props */ }) {
       return; // stop here, no redirect or login
     }
 
-    // ✅ Store Access Token manually in localStorage
+    //  Store Access Token manually in localStorage
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("user", JSON.stringify(user));
 
     setSuccessMessage("Login successful!");
 
-    // ✅ Role-based redirect
+    //  Role-based redirect
     const roleRedirects = {
       admin: "/dashboard/Admin",
       athlete: "/dashboard/Athlete",
