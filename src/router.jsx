@@ -11,7 +11,7 @@ import ResetPassword from "./page/Resetpassword";
 import AdminDashboard from "./page/dashboard/Admin";
 import ProfilePage from "./page/ProfilePage";
 import CoachDashboard from "./page/dashboard/Coach";
-import GymDashboard from "./page/dashboard/Gym";
+import GymDashboard from "./page/dashboard/GymDashboard/Dashboard";
 import AthleteDashboard from "./page/dashboard/Athlete";
 
 import CreateProgramPage from "./page/CreateProgramPage";
@@ -76,10 +76,7 @@ const router = createBrowserRouter([
     path: "/reset-password",
     element: <ResetPassword />
   },
-
-   /* // Layout with nested routes
   {
-    path: "/",
     element: <MainLayout />,
     children: [
       {
