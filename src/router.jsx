@@ -10,7 +10,7 @@ import ResetPassword from "./page/Resetpassword";
 // Dashboards
 import AdminDashboard from "./page/dashboard/Admin";
 import CoachDashboard from "./page/dashboard/Coach";
-import GymDashboard from "./page/dashboard/Gym";
+import GymDashboard from "./page/dashboard/GymDashboard/Dashboard";
 import AthleteDashboard from "./page/dashboard/Athlete";
 
 import CreateProgramPage from "./page/CreateProgramPage";
@@ -69,8 +69,8 @@ const router = createBrowserRouter([
   {
     path: "/reset-password",
     element: <ResetPassword />
-  }
-
+  },
+  {
     element: <MainLayout />,
     children: [
       {

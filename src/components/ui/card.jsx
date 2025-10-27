@@ -24,8 +24,7 @@ function Card({
     }
   })();
 
-  ...props
-}) {
+
   return (
     <div
       data-slot="card"
