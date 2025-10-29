@@ -8,9 +8,9 @@ import { Toaster } from "sonner";
 import ScrollReveal from "./components/ui/scroll-reveal";
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
+      <Toaster position="top-right" richColors />
     <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={5} blurStrength={10}>
       <RouterProvider router={router} />
-      <Toaster position="top-right" richColors />
     </ScrollReveal>
   </Provider>
 );
