@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import emailjs from "emailjs-com";
 import { toast } from "sonner"; // or "react-hot-toast"
-
 const ContactForm = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -18,7 +17,6 @@ const ContactForm = () => {
       [e.target.name]: e.target.value
     });
   };
-
 
 const handleSubmit = (e) => {
   e.preventDefault();
@@ -62,7 +60,6 @@ const handleSubmit = (e) => {
             Have questions or feedback? We'd love to hear from you. Fill out the form below or reach out directly.
           </p>
         </div>
-
         <div className="grid md:grid-cols-2 gap-12">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
