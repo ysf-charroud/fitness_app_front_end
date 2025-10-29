@@ -1,0 +1,214 @@
+
+:root {
+  /* CUSTOM VARIABLES */
+
+  /* Text */
+  --ff: "Poppins", sans-serif;
+
+  --text-primary: var(--color-neutral-900);
+  --text-secondary: var(--color-neutral-200);
+  --text-accent: var(--color-neutral-300);
+  --text-muted: var(--color-neutral-400);
+  --text-success: var(--color-green-500);
+  --text-danger: var(--color-red-500);
+
+  /* Surface */
+  --surface-primary: var(--color-neutral-200);
+  --surface-outline: color-mix(in oklab, var(--color-white) 10%, transparent);
+  --surface-secondary: var(--color-neutral-900);
+  --surface-accent: var(--color-neutral-900);
+  --surface-background: var(--color-neutral-950);
+  --surface-muted: var(--color-neutral-600);
+  --surface-l: var(--color-neutral-900);
+  --surface-h: var(--color-neutral-800);
+
+  --surface-success: var(--color-green-400);
+  --surface-danger: var(--color-red-400);
+  --surface-warning: var(--color-yellow-300);
+  --surface-info: var(--color-blue-400);
+
+  --surface-success-outline: color-mix(in oklab, #166534 10%, transparent);
+  --surface-danger-outline: color-mix(in oklab, #991b1b 10%, transparent);
+  --surface-warning-outline: color-mix(in oklab, #854d0e 10%, transparent);
+  --surface-info-outline: color-mix(in oklab, #1e40af 10%, transparent);
+
+  /* Border */
+
+  --border-h: var(--color-neutral-300);
+  --border-m: var(--color-neutral-400);
+  --border-l: var(--color-neutral-500);
+  --border-muted: var(--color-neutral-700);
+
+  --border-success: var(--color-green-900);
+  --border-warning: var(--color-yellow-600);
+  --border-danger: var(--color-red-900);
+  --border-info: var(--color-blue-600);
+
+  /* Icon */
+  --icon-primary: var(--color-neutral-300);
+  --icon-muted: var(--color-neutral-500);
+
+  --icon-green: var(--color-green-600);
+  --icon-danger: var(--color-red-600);
+  --icon-warning: var(--color-yellow-600);
+  --icon-info: var(--color-blue-600);
+
+  /* shadcn */
+
+  --radius: 0.625rem;
+  /* Shadow */
+  --shadow-d-sm: inset 0 4px 4px oklch(100% 0 0 / 0.1),
+    0 2px 1px oklch(0% 0 0 / 0.25), 0 7px 10px oklch(0% 0 0 / 0.25);
+
+  --shadow-d-md: inset 0 7px 4px oklch(100% 0 0 / 0.1),
+    0 4px 2px oklch(0% 0 0 / 0.25), 0 7px 14px oklch(0% 0 0 / 0.25);
+
+    --shadow-r-l: var(--color-neutral-700);
+    --shadow-r-m: var(--color-neutral-600);
+    --shadow-r-h: var(--color-neutral-500);
+}
+
+.dark {
+  /* CUSTOM VARIABLES */
+  /* Text */
+  --ff: "Poppins", sans-serif;
+
+  --text-primary: var(--color-neutral-900);
+  --text-secondary: var(--color-neutral-300);
+  --text-accent: var(--color-neutral-300);
+  --text-muted: var(--color-neutral-400);
+  --text-success: var(--color-green-500);
+  --text-danger: var(--color-red-500);
+  --text-muted: var(--color-neutral-500);
+
+  /* Surface */
+  --surface-primary: var(--color-neutral-200);
+  --surface-outline: color-mix(in oklab, var(--color-white) 10%, transparent);
+  --surface-secondary: var(--color-neutral-900);
+  --surface-accent: var(--color-neutral-900);
+  --surface-background: var(--color-neutral-950);
+  --surface-muted: var(--color-neutral-600);
+  --surface-l: var(--color-neutral-900);
+  --surface-h: var(--color-neutral-800);
+
+  --surface-success: var(--color-green-400);
+  --surface-danger: var(--color-red-400);
+  --surface-warning: var(--color-yellow-300);
+  --surface-info: var(--color-blue-400);
+
+  --surface-success-outline: color-mix(in oklab, #166534 10%, transparent);
+  --surface-danger-outline: color-mix(in oklab, #991b1b 10%, transparent);
+  --surface-warning-outline: color-mix(in oklab, #854d0e 10%, transparent);
+  --surface-info-outline: color-mix(in oklab, #1e40af 10%, transparent);
+
+  /* Border */
+
+  --border-h: var(--color-neutral-300);
+  --border-m: var(--color-neutral-400);
+  --border-l: var(--color-neutral-500);
+  --border-muted: var(--color-neutral-700);
+
+  --border-success: var(--color-green-900);
+  --border-warning: var(--color-yellow-600);
+  --border-danger: var(--color-red-900);
+  --border-info: var(--color-blue-600);
+
+  /* Icon */
+  --icon-primary: var(--color-neutral-300);
+  --icon-muted: var(--color-neutral-500);
+
+  --icon-green: var(--color-green-600);
+  --icon-danger: var(--color-red-600);
+  --icon-warning: var(--color-yellow-600);
+  --icon-info: var(--color-blue-600);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  /*custom*/
+  --color-background: var(--surface-background);
+  --color-foreground: var(--text-secondary);
+  --color-card: var(--surface-l);
+  --color-card-foreground: var(--text-secondary);
+  --color-popover: var(--surface-h);
+  --color-popover-foreground: var(--text-secondary);
+  --color-primary: var(--surface-primary);
+  --color-primary-foreground: var(--text-primary);
+  --color-secondary: var(--surface-secondary);
+  --color-secondary-foreground: var(--text-secondary);
+  --color-muted: var(--surface-muted);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--surface-accent);
+  --color-accent-foreground: var(--text-accent);
+  --color-destructive: red;
+  --color-border: var(--border-l);
+  --color-input: var(--border-l);
+  --color-ring: var(--shadow-r-m);
+  --color-chart-1: red;
+  --color-chart-2: yellow;
+  --color-chart-3: red;
+  --color-chart-4: yellow;
+  --color-chart-5: red;
+  --color-sidebar: var(--surface-l);
+  --color-sidebar-foreground: var(--text-secondary);
+  --color-sidebar-primary: var(--surface-primary);
+  --color-sidebar-primary-foreground: var(--text-primary);
+  --color-sidebar-accent: var(--surface-accent);
+  --color-sidebar-accent-foreground: var(--text-accent);
+  --color-sidebar-border: var(--border-m);
+  --color-sidebar-ring: red;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  @keyframes marquee {
+  from {
+    transform: translateX(0);
+    }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+    }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+}
+
+
