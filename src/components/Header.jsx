@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { toast } from 'sonner';
+import { Button } from '../components/ui/button';   
+
 const Header = () => {
   return (
     <header className="bg-white border-b border-gray-100">
@@ -26,9 +27,9 @@ const Header = () => {
               <Link to="/login">Login</Link>
               
             </button>
-            <button className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition-colors">
+            <Button className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition-colors">
               <Link to="/register">Sign Up</Link>
-            </button>
+            </Button>
             
           </div>
         </div>

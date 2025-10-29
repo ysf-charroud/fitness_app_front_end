@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 const HeroSection = () => {
   return (
     <section className="bg-gradient-to-br from-purple-50 to-white py-16 md:py-24">
@@ -12,9 +12,11 @@ const HeroSection = () => {
             <p className="text-lg text-gray-600 mb-8 max-w-lg">
               Connect with elite coaches and discover premier gyms tailored to your goals. Achieve your peak performance with personalized guidance.
             </p>
-            <button className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-purple-800 transition-colors shadow-lg hover:shadow-xl">
-              Find Your Coach
-            </button>
+            
+            <InteractiveHoverButton>
+                Find Your Coach
+            </InteractiveHoverButton>
+
           </div>
 
           <div className="relative">

@@ -75,7 +75,7 @@ const router = createBrowserRouter([
   {
     path: "/reset-password",
     element: <ResetPassword />
-  },
+  }/* ,
   {
     element: <MainLayout />,
     children: [
@@ -84,10 +84,10 @@ const router = createBrowserRouter([
         element: <CreateProgramPage />,
       },
     ],
-  },
+  }, */
 
   // Catch-all 404 route
-  { path: "*", element: <div>404 not found</div> }, */
+ // { path: "*", element: <div>404 not found</div> }
 
 ]);
 
