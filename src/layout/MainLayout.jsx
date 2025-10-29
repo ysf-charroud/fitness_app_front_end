@@ -1,11 +1,14 @@
+import CoachSideBar from "@/components/CoachSideBar";
 import { Outlet } from "react-router";
 
-const MainLayout = () => {
+const CoachLayout = () => {
   return (
-    <div className="bg-background min-h-screen">
-      <Outlet />
-    </div>
+    <main className="bg-background min-h-screen">
+      <CoachSideBar>
+        <Outlet />
+      </CoachSideBar>
+    </main>
   );
 };
 
-export default MainLayout;
+export default CoachLayout;

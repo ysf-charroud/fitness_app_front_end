@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@hookform/resolvers": "^5.2.2",
     "@material-tailwind/react": "^2.1.10",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -37,6 +38,7 @@
     "next-themes": "^0.4.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-hook-form": "^7.65.0",
     "react-phone-input-2": "^2.15.1",
     "react-redux": "^9.2.0",
     "react-router": "^7.9.3",
@@ -45,7 +47,8 @@
     "sonner": "^2.0.7",
     "sweetalert2": "^11.26.3",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.14"
+    "tailwindcss": "^4.1.14",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

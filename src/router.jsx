@@ -1,5 +1,7 @@
 import { createBrowserRouter, /* Navigate */ } from "react-router-dom";
 import Home from "./page/Home";
+import CoachLayout from "./layout/MainLayout";
+import ProgramPage from "./page/ProgramPage";
 
 import Login from "./page/Login";
 import Register from "./page/Register";
@@ -77,11 +79,16 @@ const router = createBrowserRouter([
     element: <ResetPassword />
   }/* ,
   {
-    element: <MainLayout />,
+    element: <CoachLayout />,
     children: [
       {
-        path: "coach/program/create",
-        element: <CreateProgramPage />,
+        path: "coach",
+        children: [
+          {
+            path: "programs",
+            element: <ProgramPage />,
+          },
+        ],
       },
     ],
   }, */
