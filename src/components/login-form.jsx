@@ -19,8 +19,10 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useDispatch } from "react-redux";
+import { setToken, setUser } from "@/services/redux/slices/authSlice";
 
-export function LoginForm({ className/* , ...props */ }) {
+export function LoginForm({ className /* , ...props */ }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,59 +30,65 @@ export function LoginForm({ className/* , ...props */ }) {
   const [serverErrors, setServerErrors] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
 
+  const dispatch = useDispatch();
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setServerErrors([]);
-  setSuccessMessage("");
+    e.preventDefault();
+    setLoading(true);
+    setServerErrors([]);
+    setSuccessMessage("");
 
-  try {
-    // Send credentials to backend
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_ORIGIN}/api/auth/login`,
-      { email, password },
-      { withCredentials: true } //  allow backend to set HttpOnly cookie
-    );
+    try {
+      // Send credentials to backend
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_ORIGIN}/api/auth/login`,
+        { email, password },
+        { withCredentials: true } //  allow backend to set HttpOnly cookie
+      );
 
-    //  Access Token returned in JSON
-    const { accessToken, user } = response.data;
+      //  Access Token returned in JSON
+      const { accessToken, user } = response.data;
 
-    //  Check if account is desactivated
-    if (user && user.isActive === false) {
-      navigate("/error");
-      //setServerErrors(["This account is not found. Please register a new one."]);
+      //  Update Redux store
+      dispatch(setUser(user));
+      dispatch(setToken(accessToken));
+
+      //  Check if account is desactivated
+      if (user && user.isActive === false) {
+        navigate("/error");
+        //setServerErrors(["This account is not found. Please register a new one."]);
+        setLoading(false);
+        return; // stop here, no redirect or login
+      }
+
+      //  Store Access Token manually in localStorage
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      setSuccessMessage("Login successful!");
+
+      //  Role-based redirect
+      const roleRedirects = {
+        admin: "/dashboard/Admin",
+        athlete: "/dashboard/Athlete",
+        coach: "/dashboard/Coach",
+        gym: "/dashboard/Gym",
+      };
+
+      // Normalize and match role safely
+      const userRole = user.role?.toLowerCase();
+      const targetPath = roleRedirects[userRole] || "/dashboard"; // default fallback
+
+      setTimeout(() => navigate(targetPath), 800);
+    } catch (err) {
+      console.error(err);
+      const message =
+        err.response?.data?.message || "Login failed. Please try again.";
+      setServerErrors([message]);
+    } finally {
       setLoading(false);
-      return; // stop here, no redirect or login
     }
-
-    //  Store Access Token manually in localStorage
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("user", JSON.stringify(user));
-
-    setSuccessMessage("Login successful!");
-
-    //  Role-based redirect
-    const roleRedirects = {
-      admin: "/dashboard/Admin",
-      athlete: "/dashboard/Athlete",
-      coach: "/dashboard/Coach",
-      gym: "/dashboard/Gym",
-    };
-
-    // Normalize and match role safely
-    const userRole = user.role?.toLowerCase();
-    const targetPath = roleRedirects[userRole] || "/dashboard"; // default fallback
-
-    setTimeout(() => navigate(targetPath), 800);
-  } catch (err) {
-    console.error(err);
-    const message =
-      err.response?.data?.message || "Login failed. Please try again.";
-    setServerErrors([message]);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} /* {...props} */>
@@ -105,7 +113,9 @@ export function LoginForm({ className/* , ...props */ }) {
                   Login with Apple
                 </Button>
                 <Button variant="outline" asChild>
-                  <a href={`${import.meta.env.VITE_API_ORIGIN}/api/auth/google`}>
+                  <a
+                    href={`${import.meta.env.VITE_API_ORIGIN}/api/auth/google`}
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                       <path
                         d="M12.48 10.92v3.28h7.84c-.24 1.84-.853   3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"

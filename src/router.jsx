@@ -1,4 +1,4 @@
-import { createBrowserRouter, /* Navigate */ } from "react-router-dom";
+import { createBrowserRouter /* Navigate */ } from "react-router-dom";
 import Home from "./page/Home";
 import CoachLayout from "./layout/MainLayout";
 import ProgramPage from "./page/ProgramPage";
@@ -17,85 +17,84 @@ import GymDashboard from "./page/dashboard/GymDashboard/Dashboard";
 import AthleteDashboard from "./page/dashboard/Athlete";
 
 //import CreateProgramPage from "./page/CreateProgramPage";
-//import MainLayout from "./layout/MainLayout";  
+//import MainLayout from "./layout/MainLayout";
 import ErrorSection7 from "./page/ErrorPage";
-
+import Auth from "./layout/Auth";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />
+    element: <Home />,
   },
   {
     path: "/login",
-    element: <Login />
+    element: <Login />,
   },
   {
     path: "/forgot-password",
-    element: <ForgotPassword />
+    element: <ForgotPassword />,
   },
   {
-
     path: "/reset-password/:token",
-    element: <ResetPassword />
+    element: <ResetPassword />,
   },
   {
     path: "/register",
-    element: <Register />
-  }
-  ,
+    element: <Register />,
+  },
   {
     path: "/verify-email",
-    element: <VerifyEmail />
-  }
-  ,
+    element: <VerifyEmail />,
+  },
   {
     path: "/login-success",
-    element: <LoginSuccess />
-  }
-  , 
+    element: <LoginSuccess />,
+  },
   {
     path: "/dashboard/coach",
-    element: <CoachDashboard />
+    element: <CoachDashboard />,
   },
   {
     path: "/dashboard/gym",
-    element: <GymDashboard />
+    element: <GymDashboard />,
   },
   {
     path: "/ProfilePage",
-    element: <ProfilePage />
+    element: <ProfilePage />,
   },
   {
     path: "/error",
-    element: <ErrorSection7 />
+    element: <ErrorSection7 />,
   },
   {
     path: "/dashboard/athlete",
-    element: <AthleteDashboard />
+    element: <AthleteDashboard />,
   },
   {
     path: "/reset-password",
-    element: <ResetPassword />
-  }/* ,
+    element: <ResetPassword />,
+  },
+  // Protected routes for auth users
   {
-    element: <CoachLayout />,
+    element: <Auth />,
     children: [
       {
-        path: "coach",
+        element: <CoachLayout />,
         children: [
           {
-            path: "programs",
-            element: <ProgramPage />,
+            path: "coach",
+            children: [
+              {
+                path: "programs",
+                element: <ProgramPage />,
+              },
+            ],
           },
         ],
       },
     ],
-  }, */
-
-  // Catch-all 404 route
- // { path: "*", element: <div>404 not found</div> }
-
+  },
+  { path: "*", element: <div className="bg-red-500 h-screen">404 not found</div> },
 ]);
 
 export default router;
