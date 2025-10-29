@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,26 +16,61 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Edit2, Trash2, Save, X } from 'lucide-react';
+import { Edit2, Trash2, Save, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { EQUIPMENT_LIST } from '@/constants/equipments';
 
-// 🔧 Hardcoded owner ID for testing (replace with real one from auth later)
 const TEST_OWNER_ID = '68fb4bc7ceef7f0d5a7c26b1';
 
 export default function GymManagement({ gym, onGymUpdate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(!gym);
+
+  // Initialize equipements as object
+  const initialEquipements = {};
+  EQUIPMENT_LIST.forEach(item => {
+    initialEquipements[item.id] = gym?.equipements?.[item.id] || false;
+  });
+
   const [formData, setFormData] = useState({
     name: gym?.name || '',
     location: gym?.location || '',
     schedule: gym?.schedule || '',
     pricing: gym?.pricing || 0,
     activities: gym?.activities?.join(', ') || '',
-    equipements: gym?.equipements?.join(', ') || '',
+    equipements: initialEquipements,
   });
+
+  // Sync formData when gym changes (e.g., after creation)
+  useEffect(() => {
+    if (gym) {
+      const newEquipements = {};
+      EQUIPMENT_LIST.forEach(item => {
+        newEquipements[item.id] = gym.equipements?.[item.id] || false;
+      });
+      setFormData({
+        name: gym.name || '',
+        location: gym.location || '',
+        schedule: gym.schedule || '',
+        pricing: gym.pricing || 0,
+        activities: gym.activities?.join(', ') || '',
+        equipements: newEquipements,
+      });
+    }
+  }, [gym]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const toggleEquipment = (equipId) => {
+    setFormData((prev) => ({
+      ...prev,
+      equipements: {
+        ...prev.equipements,
+        [equipId]: !prev.equipements[equipId],
+      },
+    }));
   };
 
   const handleSave = async () => {
@@ -49,24 +84,18 @@ export default function GymManagement({ gym, onGymUpdate }) {
           .split(',')
           .map((a) => a.trim())
           .filter(Boolean),
-        equipements: formData.equipements
-          .split(',')
-          .map((e) => e.trim())
-          .filter(Boolean),
+        equipements: formData.equipements, 
         owner: TEST_OWNER_ID,
       };
 
       let response;
-
       if (gym) {
-        // ✅ Use PATCH instead of PUT
         response = await fetch(`http://localhost:5000/api/gyms/${gym._id || gym.id}`, {
-          method: 'PATCH', // ← changed from 'PUT' to 'PATCH'
+          method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(gymData),
         });
       } else {
-        // Create new gym
         response = await fetch('http://localhost:5000/api/gyms', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -80,7 +109,6 @@ export default function GymManagement({ gym, onGymUpdate }) {
       }
 
       const savedGym = await response.json();
-
       onGymUpdate(savedGym);
       toast.success(gym ? 'Gym updated successfully' : 'Gym created successfully');
       setIsEditing(false);
@@ -93,17 +121,14 @@ export default function GymManagement({ gym, onGymUpdate }) {
 
   const handleDelete = async () => {
     if (!gym) return;
-
     try {
       const response = await fetch(`http://localhost:5000/api/gyms/${gym._id || gym.id}`, {
         method: 'DELETE',
       });
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to delete gym');
       }
-
       onGymUpdate(null);
       toast.success('Gym deleted successfully');
       setIsCreating(true);
@@ -115,13 +140,17 @@ export default function GymManagement({ gym, onGymUpdate }) {
 
   const handleCancel = () => {
     if (gym) {
+      const resetEquipements = {};
+      EQUIPMENT_LIST.forEach(item => {
+        resetEquipements[item.id] = gym.equipements?.[item.id] || false;
+      });
       setFormData({
         name: gym.name,
         location: gym.location,
         schedule: gym.schedule,
         pricing: gym.pricing,
         activities: gym.activities.join(', '),
-        equipements: gym.equipements.join(', '),
+        equipements: resetEquipements,
       });
       setIsEditing(false);
     }
@@ -147,7 +176,6 @@ export default function GymManagement({ gym, onGymUpdate }) {
                 placeholder="FitClub Casablanca"
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="pricing">Pricing (per month)</Label>
               <Input
@@ -193,14 +221,27 @@ export default function GymManagement({ gym, onGymUpdate }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="equipements">Equipment IDs (comma-separated)</Label>
-            <Textarea
-              id="equipements"
-              value={formData.equipements}
-              onChange={(e) => handleInputChange('equipements', e.target.value)}
-              placeholder="660a1b2c3d4e5f6a7b8c9d0e, ..."
-              rows={2}
-            />
+            <Label>Equipment</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {EQUIPMENT_LIST.map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-2 border rounded">
+                  <span className="text-sm">{item.label}</span>
+                  <Button
+                    type="button"
+                    variant={formData.equipements[item.id] ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => toggleEquipment(item.id)}
+                    className="h-7"
+                  >
+                    {formData.equipements[item.id] ? (
+                      <Check className="h-3 w-3" />
+                    ) : (
+                      <span className="text-xs">Add</span>
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="flex gap-2 pt-4">
@@ -249,10 +290,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDelete}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
+                  <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -267,11 +305,10 @@ export default function GymManagement({ gym, onGymUpdate }) {
             <h3 className="font-semibold text-sm text-slate-500 mb-2">Schedule</h3>
             <p className="text-slate-900">{gym.schedule}</p>
           </div>
-
           <div>
             <h3 className="font-semibold text-sm text-slate-500 mb-2">Pricing</h3>
             <p className="text-slate-900 text-2xl font-bold">
-              ${gym.pricing.toFixed(2)}
+              {gym.pricing.toFixed(2)}Dh
               <span className="text-sm font-normal text-slate-500">/month</span>
             </p>
           </div>
@@ -280,7 +317,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
         <div>
           <h3 className="font-semibold text-sm text-slate-500 mb-2">Activities</h3>
           <div className="flex flex-wrap gap-2">
-            {gym.activities.map((activity, index) => (
+            {gym.activities?.map((activity, index) => (
               <Badge key={index} variant="secondary" className="capitalize">
                 {activity}
               </Badge>
@@ -288,18 +325,20 @@ export default function GymManagement({ gym, onGymUpdate }) {
           </div>
         </div>
 
-        {gym.equipements?.length > 0 && (
-          <div>
-            <h3 className="font-semibold text-sm text-slate-500 mb-2">Equipment IDs</h3>
-            <div className="flex flex-wrap gap-2">
-              {gym.equipements.map((equip, index) => (
-                <Badge key={index} variant="outline">
-                  {equip}
+        <div>
+          <h3 className="font-semibold text-sm text-slate-500 mb-2">Equipment</h3>
+          <div className="flex flex-wrap gap-2">
+            {EQUIPMENT_LIST.filter(item => gym.equipements?.[item.id])
+              .map((item) => (
+                <Badge key={item.id} variant="outline">
+                  {item.label}
                 </Badge>
               ))}
-            </div>
+            {Object.keys(gym.equipements || {}).length === 0 && (
+              <span className="text-slate-400 text-sm">None</span>
+            )}
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
