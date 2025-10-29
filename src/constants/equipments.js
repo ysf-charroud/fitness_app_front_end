@@ -1,0 +1,23 @@
+// src/constants/equipments.js
+export const EQUIPMENT_LIST = [
+  { id: 'treadmill', label: 'Treadmill' },
+  { id: 'elliptical', label: 'Elliptical' },
+  { id: 'stationary_bike', label: 'Stationary Bike' },
+  { id: 'rowing_machine', label: 'Rowing Machine' },
+  { id: 'dumbbells', label: 'Dumbbells' },
+  { id: 'barbells', label: 'Barbells' },
+  { id: 'kettlebells', label: 'Kettlebells' },
+  { id: 'squat_rack', label: 'Squat Rack' },
+  { id: 'bench_press', label: 'Bench Press' },
+  { id: 'cable_machine', label: 'Cable Machine' },
+  { id: 'lat_pulldown', label: 'Lat Pulldown' },
+  { id: 'leg_press', label: 'Leg Press' },
+  { id: 'pec_deck', label: 'Pec Deck' },
+  { id: 'shoulder_press_machine', label: 'Shoulder Press Machine' },
+  { id: 'resistance_bands', label: 'Resistance Bands' },
+  { id: 'medicine_balls', label: 'Medicine Balls' },
+  { id: 'stability_ball', label: 'Stability Ball' },
+  { id: 'battle_ropes', label: 'Battle Ropes' },
+  { id: 'yoga_mats', label: 'Yoga Mats' },
+  { id: 'pull_up_bar', label: 'Pull-Up Bar' },
+];

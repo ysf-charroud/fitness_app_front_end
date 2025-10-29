@@ -4,8 +4,28 @@ import { cn } from "@/lib/utils"
 
 function Card({
   className,
+  // optional size: sm | md | lg | xl | full
+  size = "",
   ...props
 }) {
+  const sizeClass = (() => {
+    switch (size) {
+      case "sm":
+        return "max-w-sm";
+      case "md":
+        return "max-w-md";
+      case "lg":
+        return "max-w-lg";
+      case "xl":
+        return "max-w-xl";
+      case "full":
+        return "w-full";
+      default:
+        return "";
+    }
+  })();
+
+
   return (
     <div
       data-slot="card"
