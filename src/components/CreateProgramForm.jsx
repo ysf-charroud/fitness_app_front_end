@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -24,66 +24,104 @@ import {
 import FileUpload from "./FileUpload";
 import GoalTags from "./GoalTags";
 // Form field configurations
-const FORM_FIELDS = [
-  {
-    name: "title",
-    label: "Program Title",
-    type: "text",
-    placeholder: "enter a value",
-  },
-  {
-    name: "price",
-    label: "Price",
-    type: "number",
-    placeholder: "enter a value",
-  },
-  {
-    name: "goals",
-    label: "Goals",
-    type: "text",
-    placeholder: "enter a value",
-  },
-  {
-    name: "period",
-    label: "Duration (days)",
-    type: "number",
-    placeholder: "enter a value",
-  },
-];
-
-// File upload configurations
-const FILE_CONFIGS = [
-  {
-    id: "cover",
-    accept: "image/*",
-    maxSize: "2MB",
-    label: "Cover Image",
-    icon: Image,
-    allowedTypes: ["image/jpeg", "image/png", "image/gif"],
-    dropzoneText: "PNG, JPG or GIF (max. 2MB)",
-  },
-  {
-    id: "program",
-    accept: ".pdf,.doc,.docx",
-    maxSize: "10MB",
-    label: "Program File",
-    icon: FileText,
-    allowedTypes: [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ],
-    dropzoneText: "PDF, DOC or DOCX (max. 10MB)",
-  },
-];
-
-// Reusable file upload component
-
-// Goal tag component
 
 export function CreateProgramForm() {
   const [coverPreview, setCoverPreview] = useState(null);
   const [programFile, setProgramFile] = useState(null);
+  const FORM_FIELDS = [
+    {
+      name: "title",
+      label: "Program Title",
+      type: "text",
+      placeholder: "enter a value",
+    },
+    {
+      name: "price",
+      label: "Price",
+      type: "number",
+      placeholder: "enter a value",
+    },
+    {
+      name: "goals",
+      label: "Goals",
+      type: "text",
+      placeholder: "enter a value",
+    },
+    {
+      name: "period",
+      label: "Duration (days)",
+      type: "number",
+      placeholder: "enter a value",
+    },
+  ];
+
+  // File upload configurations
+  const FILE_CONFIGS = [
+    {
+      id: "cover",
+      accept: "image/*",
+      maxSize: "2MB",
+      file: coverPreview,
+      label: "Cover Image",
+      icon: Image,
+      onFileSelect: (files) => {
+        if (coverPreview) URL.revokeObjectURL(coverPreview);
+        const url = URL.createObjectURL(files[0]);
+        setCoverPreview(url);
+        form.setValue("image", files);
+      },
+      onFileDelete: () => {
+        if (coverPreview) URL.revokeObjectURL(coverPreview);
+        setCoverPreview(null);
+        form.setValue("image", null);
+      },
+      preview: () => (
+        <img
+          src={coverPreview}
+          alt="Cover preview"
+          className="w-full h-[200px] object-cover rounded-lg shadow-sm"
+        />
+      ),
+      allowedTypes: ["image/jpeg", "image/png", "image/gif"],
+      dropzoneText: "PNG, JPG or GIF (max. 2MB)",
+    },
+    {
+      id: "program",
+      accept: ".pdf,.doc,.docx",
+      maxSize: "10MB",
+      file: programFile,
+      label: "Program File",
+      icon: FileText,
+      onFileSelect: (files) => {
+        setProgramFile(files[0]);
+        form.setValue("file", files);
+      },
+      onFileDelete: () => {
+        setProgramFile(null);
+        form.setValue("file", null);
+      },
+      preview: () => (
+        <div className="flex items-center gap-4 p-4">
+          <div className="flex-1 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--color-popover)]">
+              <FileText className="w-5 h-5 text-[var(--color-muted-foreground)]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-[var(--color-primary)] truncate">
+                {programFile?.name || "No file selected"}
+              </p>
+            </div>
+          </div>
+        </div>
+      ),
+      allowedTypes: [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ],
+      dropzoneText: "PDF, DOC or DOCX (max. 10MB)",
+    },
+  ];
 
   // Form state
   const form = useForm({
@@ -97,18 +135,11 @@ export function CreateProgramForm() {
       cover: null,
     },
   });
-
   const goals = form.watch("goals");
-  // Local state
+  console.log(form.formState.errors);
 
-  useEffect(() => {
-    return () => {
-      if (coverPreview) URL.revokeObjectURL(coverPreview);
-    };
-  }, [coverPreview]);
-
-  const onTagDelete = (goal) => {
-    const currentGoals = goals || [];
+  const onGoalDelete = (goal) => {
+    const currentGoals = goals;
     const filteredGoals = currentGoals.filter((g) => g !== goal);
     form.setValue("goals", filteredGoals, {
       shouldValidate: true,
@@ -122,26 +153,41 @@ export function CreateProgramForm() {
     programFormData.append("goals", goals.join(", "));
     programFormData.append("period", data.period);
 
+    // Match backend field names from the controller
     if (data.program?.[0]) {
-      programFormData.append("program", data.program[0]);
+      programFormData.append("file", data.program[0]);
     }
     if (data.cover?.[0]) {
-      programFormData.append("cover", data.cover[0]);
+      programFormData.append("image", data.cover[0]);
     }
 
-    console.log("Form data:", Object.fromEntries(programFormData));
+    // try {
+    //   // Get token from localStorage or your auth state management
 
-    // const response = await api.post("/api/programs", programFormData, {
-    //   headers: {
-    //     "Content-Type": "multipart/form-data",
-    //     Authorization: `Bearer ${"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZmEwYmExYjcyZDEyNDllMTI3YTE3NSIsInJvbGUiOiJjb2FjaCIsImlhdCI6MTc2MTIxNzUwNSwiZXhwIjoxNzYyNTEzNTA1fQ.7qXVLtYi2iKxYtd1129ljPd5WOUVm_RBvNrbJS11Xn4"}`,
-    //   },
-    // });
-    // console.log("Program created:", response.data);
+    //   const response = await fetch("/api/programs", {
+    //     method: "POST",
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //     body: programFormData,
+    //   });
+
+    //   if (!response.ok) {
+    //     const errorData = await response.json();
+    //     throw new Error(errorData.message || "Failed to create program");
+    //   }
+
+    //   const result = await response.json();
+    //   console.log("Program created:", result);
+
+    //   // Reset form or redirect
+    //   form.reset();
+    // } catch (error) {
+    //   console.error("Error creating program:", error);
+    //   // Handle error (show toast notification, etc.)
+    // }
   };
 
-  console.log(form.formState.errors);
-  console.log(goals);
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -149,18 +195,19 @@ export function CreateProgramForm() {
       </SheetTrigger>
       <SheetContent className="sm:max-w-[600px] px-6 py-4 overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>
-            <div className="flex items-center gap-2 text-2xl font-bold text-foreground mb-4">
-              <BookOpen className="h-5 w-5" />
-              Add New Program
-            </div>
+          <SheetTitle
+            className={
+              "flex items-center gap-2 text-2xl font-bold text-foreground mb-4"
+            }
+          >
+            <BookOpen className="h-5 w-5" />
+            <span>Add New Program</span>
           </SheetTitle>
         </SheetHeader>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            encType="multipart/form-data"
             className="grid grid-cols-1 sm:grid-cols-4 gap-4"
           >
             {FORM_FIELDS.map((f) => {
@@ -191,7 +238,10 @@ export function CreateProgramForm() {
                                     e.target.value = "";
                                     if (value && !goals.includes(value)) {
                                       const updated = [...goals, value];
-                                      field.onChange(updated);
+                                      form.setValue("goals", updated, {
+                                        shouldValidate: true,
+                                        shouldDirty: true,
+                                      });
                                     }
                                   }
                                 }}
@@ -200,7 +250,7 @@ export function CreateProgramForm() {
 
                               <GoalTags
                                 goals={goals}
-                                onTagDelete={onTagDelete}
+                                onTagDelete={onGoalDelete}
                               />
                               <div className="mt-2 text-xs text-[var(--color-muted-foreground)]">
                                 Press Enter to add each goal
@@ -234,50 +284,10 @@ export function CreateProgramForm() {
                 <FileUpload
                   key={config.id}
                   config={config}
-                  file={config.id === "cover" ? coverPreview : programFile}
-                  onFileSelect={(file) => {
-                    if (config.id === "cover") {
-                      if (coverPreview) URL.revokeObjectURL(coverPreview);
-                      const url = URL.createObjectURL(file);
-                      setCoverPreview(url);
-                      form.setValue("cover", [file]);
-                    } else {
-                      setProgramFile(file);
-                      form.setValue("program", [file]);
-                    }
-                  }}
-                  onFileDelete={() => {
-                    if (config.id === "cover") {
-                      if (coverPreview) URL.revokeObjectURL(coverPreview);
-                      setCoverPreview(null);
-                      form.setValue("cover", null);
-                    } else {
-                      setProgramFile(null);
-                      form.setValue("program", null);
-                    }
-                  }}
-                  preview={(file) =>
-                    config.id === "cover" ? (
-                      <img
-                        src={file}
-                        alt="Cover preview"
-                        className="w-full h-[200px] object-cover rounded-lg shadow-sm"
-                      />
-                    ) : (
-                      <div className="flex items-center gap-4 p-4">
-                        <div className="flex-1 flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--color-popover)]">
-                            <FileText className="w-5 h-5 text-[var(--color-muted-foreground)]" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-[var(--color-primary)] truncate">
-                              {file.name}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  }
+                  file={config.file}
+                  onFileSelect={config.onFileSelect}
+                  onFileDelete={config.onFileDelete}
+                  preview={config.preview}
                 />
               ))}
             </div>

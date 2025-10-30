@@ -1,7 +1,9 @@
+import { toast } from "sonner";
 import DeleteButton from "./DeleteButtons";
 
-const FileUpload = ({ config, file, onFileSelect, onFileDelete, preview }) => {
+const FileUpload = ({ config, onFileSelect, onFileDelete }) => {
   const Icon = config.icon;
+  const Preview = config.preview;
 
   return (
     <div className="flex flex-col">
@@ -26,26 +28,19 @@ const FileUpload = ({ config, file, onFileSelect, onFileDelete, preview }) => {
           id={config.id}
           type="file"
           accept={config.accept}
-          onClick={(e) => {
-            e.target.value = "";
-          }}
           onChange={(e) => {
             const files = e.target.files;
-            if (!files?.length) {
-              onFileDelete();
-              return;
-            }
+            if (!files?.length) return;
             const selectedFile = files[0];
             if (config.allowedTypes.includes(selectedFile.type)) {
-              onFileSelect(selectedFile);
+              onFileSelect(files);
             } else {
-              e.target.value = "";
-              console.error("Invalid file type");
+              toast.error('file type is invalid')
             }
           }}
           className="hidden"
         />
-        {!file ? (
+        {!config.file ? (
           <label
             htmlFor={config.id}
             className="flex flex-col items-center gap-2 cursor-pointer p-4"
@@ -68,7 +63,7 @@ const FileUpload = ({ config, file, onFileSelect, onFileDelete, preview }) => {
           </label>
         ) : (
           <div className="relative group">
-            {preview(file)}
+            <Preview />
             <DeleteButton
               onDelete={(e) => {
                 e.stopPropagation();

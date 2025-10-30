@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { Search, Filter } from "lucide-react";
 import ProgramCard from "../components/PorgramCard";
 import { CreateProgramForm } from "../components/CreateProgramForm";
-import CoachSideBar from "@/components/CoachSideBar";
+import CoachSideBar from "@/components/coach/CoachSideBar";
 
 const initialPrograms = [
   {

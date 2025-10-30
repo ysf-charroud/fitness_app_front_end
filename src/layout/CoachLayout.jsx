@@ -1,4 +1,4 @@
-import CoachSideBar from "@/components/CoachSideBar";
+import CoachSideBar from "@/components/coach/CoachSideBar";
 import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router";
 
