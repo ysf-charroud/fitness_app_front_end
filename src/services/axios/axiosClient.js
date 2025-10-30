@@ -1,42 +1,57 @@
 // services/axios/axiosClient.js
 import axios from "axios";
+import store from "../redux/store";
+import { setToken } from "../redux/slices/authSlice";
 
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const api = axios.create({
-  baseURL,
-  headers: { 
-    "Content-Type": "application/json"
+  baseURL: import.meta.env.VITE_API_ORIGIN,
+  headers: {
+    "Content-Type": "application/json",
   },
 });
 
-// Interceptor corrigé
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    console.log("🔄 Interceptor - Token trouvé:", token ? "OUI" : "NON");
-    
+  function (config) {
+    const { token } = store.getState().auth;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("✅ Headers envoyés:", config.headers);
-    } else {
-      console.warn("⚠️ Aucun token trouvé dans localStorage");
     }
     return config;
   },
-  (error) => {
+  function (error) {
     return Promise.reject(error);
   }
 );
 
-// Interceptor pour debug des réponses
 api.interceptors.response.use(
-  (response) => {
-    console.log("✅ Réponse reçue:", response.status, response.data);
+  function onFulfilled(response) {
     return response;
   },
-  (error) => {
-    console.error("❌ Erreur API:", error.response?.status, error.response?.data);
+  async function onRejected(error) {
+    const originalRequest = error.config;
+
+    // Access token expired
+    if (error.response?.status === 401 && !originalRequest.sent) {
+      originalRequest.sent = true;
+      try {
+        const response = await api.post(
+          "/api/auth/refresh",
+          {},
+          {
+            withCredentials: true,
+          }
+        );
+        const { accessToken } = response.data;
+        store.dispatch(setToken(accessToken));
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return axios(originalRequest);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    }
+
     return Promise.reject(error);
   }
 );
