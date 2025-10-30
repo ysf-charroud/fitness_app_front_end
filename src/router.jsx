@@ -1,5 +1,12 @@
-import { createBrowserRouter /* Navigate */ } from "react-router-dom";
-import Home from "./page/Home";
+import { createBrowserRouter } from "react-router";
+import Home from "./pages/Home";
+import AdminLayout from "./components/layout/AdminLayout";
+import Dashboard from "./pages/Dashboard";
+import UsersList from "./pages/UsersList";
+import ProgramsList from "./pages/ProgramsList";
+import CoachesList from "./pages/CoachesList";
+import GymsList from "./pages/GymsList";
+import Transactions from "./pages/Statistics"
 import CoachLayout from "./layout/CoachLayout";
 import ProgramPage from "./page/ProgramPage";
 
@@ -27,13 +34,25 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   {
+    path: "admin/",
+    element: <AdminLayout />,
+    children: [
+      {index: true, element: <Dashboard/>},
+      {path: "home", element: <Dashboard/>},
+      { path: "athletes", element: <UsersList /> },
+      { path: "programs", element: <ProgramsList /> },
+      { path: "coaches", element: <CoachesList /> },
+      { path: "gyms", element: <GymsList /> },
+      { path: "transactions", element: <Transactions /> },
+    ],
+  },{
     path: "/login",
     element: <Login />,
   },
   {
     path: "/forgot-password",
     element: <ForgotPassword />,
-  },
+  },+
   {
     path: "/reset-password/:token",
     element: <ResetPassword />,
