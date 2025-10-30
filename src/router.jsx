@@ -1,6 +1,6 @@
 import { createBrowserRouter /* Navigate */ } from "react-router-dom";
 import Home from "./page/Home";
-import CoachLayout from "./layout/MainLayout";
+import CoachLayout from "./layout/CoachLayout";
 import ProgramPage from "./page/ProgramPage";
 
 import Login from "./page/Login";

@@ -12,7 +12,7 @@ const api = axios.create({
 api.interceptors.request.use(
   function (config) {
     const { token } = store.getState().auth;
-     if (token) {
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -33,13 +33,17 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest.sent) {
       originalRequest.sent = true;
       try {
-        const response = await api.post("/api/auth/refresh", {}, {
-          withCredentials: true,
-        });
-         const { accessToken } = response.data;
+        const response = await api.post(
+          "/api/auth/refresh",
+          {},
+          {
+            withCredentials: true,
+          }
+        );
+        const { accessToken } = response.data;
         store.dispatch(setToken(accessToken));
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-         return axios(originalRequest);
+        return axios(originalRequest);
       } catch (error) {
         return Promise.reject(error);
       }

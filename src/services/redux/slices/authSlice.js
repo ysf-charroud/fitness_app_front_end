@@ -9,7 +9,6 @@ export const fetchUser = createAsyncThunk(
       const userData = response.data;
       return userData;
     } catch (error) {
-      console.error("Error fetching user data:", error);
       return thunkAPI.rejectWithValue(
         error.response?.data || "Failed to fetch user data"
       );
@@ -22,7 +21,7 @@ const authSlice = createSlice({
   initialState: {
     user: null,
     token: null,
-    isLoading: false,
+    isLoading: true,
     error: null,
   },
   reducers: {
