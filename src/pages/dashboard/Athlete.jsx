@@ -1,7 +1,7 @@
 import React from "react";
 import {
   Profile
-} from "@/page/Profile"
+} from "@/pages/Profile"
 //import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 export default function AthleteDashboard() {
   return (

@@ -3,7 +3,8 @@ import axios from "axios";
 import store from "../redux/store";
 import { setToken } from "../redux/slices/authSlice";
 
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// Variable to store the refresh token promise
+let refreshTokenPromise = null;
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_ORIGIN,
@@ -11,6 +12,23 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+// Separate function to handle token refresh
+const refreshAccessToken = async () => {
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_ORIGIN}/api/auth/refresh`,
+      {},
+      { withCredentials: true }
+    );
+    const { accessToken } = response.data;
+    store.dispatch(setToken(accessToken));
+    return accessToken;
+  } finally {
+    // Clear the promise reference when done (success or failure)
+    refreshTokenPromise = null;
+  }
+};
 
 api.interceptors.request.use(
   function (config) {
@@ -26,32 +44,30 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  function onFulfilled(response) {
-    return response;
-  },
-  async function onRejected(error) {
+  (response) => response,
+  async (error) => {
     const originalRequest = error.config;
 
-    // Access token expired
-    if (error.response?.status === 401 && !originalRequest.sent) {
-      originalRequest.sent = true;
+    console.log("one");
+    // Only handle 401 errors for non-refresh requests that haven't been retried
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
       try {
-        const response = await api.post(
-          "/api/auth/refresh",
-          {},
-          {
-            withCredentials: true,
-          }
-        );
-        const { accessToken } = response.data;
-        store.dispatch(setToken(accessToken));
+        // Create or reuse existing refresh token request
+        refreshTokenPromise = refreshTokenPromise || refreshAccessToken();
+
+        // Wait for the token and retry the original request
+        const accessToken = await refreshTokenPromise;
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axios(originalRequest);
       } catch (error) {
+        // Token refresh failed - reject with original error
         return Promise.reject(error);
       }
     }
 
+    // For all other errors, just reject
     return Promise.reject(error);
   }
 );

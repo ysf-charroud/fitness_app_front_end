@@ -8,24 +8,24 @@ import CoachesList from "./pages/CoachesList";
 import GymsList from "./pages/GymsList";
 import Transactions from "./pages/Statistics"
 import CoachLayout from "./layout/CoachLayout";
-import ProgramPage from "./page/ProgramPage";
+import ProgramPage from "./pages/ProgramPage";
 
-import Login from "./page/Login";
-import Register from "./page/Register";
-import VerifyEmail from "./page/VerifyEmail";
-import LoginSuccess from "./page/LoginSuccess";
-import ForgotPassword from "./page/Forgotpassword";
-import ResetPassword from "./page/Resetpassword";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
+import LoginSuccess from "./pages/LoginSuccess";
+import ForgotPassword from "./pages/Forgotpassword";
+import ResetPassword from "./pages/Resetpassword";
 // Dashboards
-//import AdminDashboard from "./page/dashboard/Admin";
-import ProfilePage from "./page/ProfilePage";
-import CoachDashboard from "./page/dashboard/Coach";
-import GymDashboard from "./page/dashboard/GymDashboard/Dashboard";
-import AthleteDashboard from "./page/dashboard/Athlete";
+//import AdminDashboard from "./pages/dashboard/Admin";
+import ProfilePage from "./pages/ProfilePage";
+import CoachDashboard from "./pages/dashboard/Coach";
+import GymDashboard from "./pages/dashboard/GymDashboard/Dashboard";
+import AthleteDashboard from "./pages/dashboard/Athlete";
 
-//import CreateProgramPage from "./page/CreateProgramPage";
+//import CreateProgramPage from "./pages/CreateProgramPage";
 //import MainLayout from "./layout/MainLayout";
-import ErrorSection7 from "./page/ErrorPage";
+import ErrorSection7 from "./pages/ErrorPage";
 import Auth from "./layout/Auth";
 
 const router = createBrowserRouter([

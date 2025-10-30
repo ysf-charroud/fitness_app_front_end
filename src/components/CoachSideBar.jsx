@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
+import { Sidebar } from "@/components/ui/sidebar";
 import {
   IconArrowLeft,
   IconBrandTabler,
@@ -8,8 +8,7 @@ import {
   IconUserBolt,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { motion } from "motion/react";
-import { DollarSign } from "lucide-react";
+ import { DollarSign } from "lucide-react";
 
 function CoachSideBar({ children }) {
   const links = [
