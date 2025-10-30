@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sheet";
 import FileUpload from "./FileUpload";
 import GoalTags from "./GoalTags";
+import api from "@/services/axios/axiosClient";
 // Form field configurations
 
 export function CreateProgramForm() {
@@ -136,7 +137,6 @@ export function CreateProgramForm() {
     },
   });
   const goals = form.watch("goals");
-  console.log(form.formState.errors);
 
   const onGoalDelete = (goal) => {
     const currentGoals = goals;
@@ -147,45 +147,19 @@ export function CreateProgramForm() {
     });
   };
   const onSubmit = async (data) => {
-    const programFormData = new FormData();
-    programFormData.append("title", data.title);
-    programFormData.append("price", data.price);
-    programFormData.append("goals", goals.join(", "));
-    programFormData.append("period", data.period);
-
-    // Match backend field names from the controller
-    if (data.program?.[0]) {
-      programFormData.append("file", data.program[0]);
+    try {
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("price", data.price);
+      formData.append("goals", data.goals);
+      formData.append("period", data.period);
+      formData.append("file", data.file);
+      formData.append("image", data.image);
+      const response = await api.post("/api/programs", formData);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
     }
-    if (data.cover?.[0]) {
-      programFormData.append("image", data.cover[0]);
-    }
-
-    // try {
-    //   // Get token from localStorage or your auth state management
-
-    //   const response = await fetch("/api/programs", {
-    //     method: "POST",
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //     body: programFormData,
-    //   });
-
-    //   if (!response.ok) {
-    //     const errorData = await response.json();
-    //     throw new Error(errorData.message || "Failed to create program");
-    //   }
-
-    //   const result = await response.json();
-    //   console.log("Program created:", result);
-
-    //   // Reset form or redirect
-    //   form.reset();
-    // } catch (error) {
-    //   console.error("Error creating program:", error);
-    //   // Handle error (show toast notification, etc.)
-    // }
   };
 
   return (

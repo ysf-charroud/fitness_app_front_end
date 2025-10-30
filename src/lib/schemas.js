@@ -40,15 +40,9 @@ export const createProgramSchema = z.object({
 
   image: z
     .instanceof(FileList)
-    .refine(
-      (files) => {
-        console.log(files);
-        return files?.length === 1;
-      },
-      {
-        message: "Please select a cover image",
-      }
-    )
+    .refine((files) => files?.length === 1, {
+      message: "Please select a cover image",
+    })
     .refine((files) => files[0]?.type.startsWith("image/"), {
       message: "Cover must be an image file (JPEG or PNG)",
     })
