@@ -1,38 +1,19 @@
-// services/axios/axiosClient.js
 import axios from "axios";
 import store from "../redux/store";
-import { setToken } from "../redux/slices/authSlice";
-
-// Variable to store the refresh token promise
-let refreshTokenPromise = null;
+import { setToken, resetAuth } from "../redux/slices/authSlice";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_ORIGIN,
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // send/receive cookies (e.g., refresh token)
 });
 
-// Separate function to handle token refresh
-const refreshAccessToken = async () => {
-  try {
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_ORIGIN}/api/auth/refresh`,
-      {},
-      { withCredentials: true }
-    );
-    const { accessToken } = response.data;
-    store.dispatch(setToken(accessToken));
-    return accessToken;
-  } finally {
-    // Clear the promise reference when done (success or failure)
-    refreshTokenPromise = null;
-  }
-};
-
+// Attach token from Redux
 api.interceptors.request.use(
   function (config) {
-    const { token } = store.getState().auth;
+    const token = store.getState().auth.token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -44,30 +25,31 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  function onFulfilled(response) {
+    return response;
+  },
+  async function onRejected(error) {
     const originalRequest = error.config;
 
-    console.log("one");
-    // Only handle 401 errors for non-refresh requests that haven't been retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
+    // Access token expired
+    const status = error?.response?.status;
+    const isRefreshCall = originalRequest?.url?.includes("/api/auth/refresh");
+    if (status === 401 && !originalRequest?.sent && !isRefreshCall) {
+      originalRequest.sent = true;
       try {
-        // Create or reuse existing refresh token request
-        refreshTokenPromise = refreshTokenPromise || refreshAccessToken();
-
-        // Wait for the token and retry the original request
-        const accessToken = await refreshTokenPromise;
+        const response = await api.post("/api/auth/refresh", {}, { withCredentials: true });
+        const { accessToken } = response.data;
+        store.dispatch(setToken(accessToken));
+        originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return axios(originalRequest);
-      } catch (error) {
-        // Token refresh failed - reject with original error
-        return Promise.reject(error);
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed (e.g., 401/403/404) -> clear auth and let app redirect
+        store.dispatch(resetAuth());
+        return Promise.reject(refreshError);
       }
     }
 
-    // For all other errors, just reject
     return Promise.reject(error);
   }
 );

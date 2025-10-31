@@ -5,8 +5,9 @@ import { Search, Filter } from "lucide-react";
 import ProgramCard from "../components/PorgramCard";
 import { CreateProgramForm } from "../components/CreateProgramForm";
 import CoachSideBar from "@/components/CoachSideBar";
+import {Profile} from "@/page/Profile"
 
-const initialPrograms = [
+  const initialPrograms = [
   {
     title: "30-Day Muscle Builder Pro",
     path: "/programs/muscle-builder-pro",

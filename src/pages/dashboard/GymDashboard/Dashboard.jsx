@@ -5,8 +5,8 @@ import { Building2, Users, UserCog } from 'lucide-react';
 import GymManagement from './GymManagement';
 import CoachesManagement from './CoachesManagement';
 import AthletesManagement from './AthletesManagement';
-
-// 🔧 === CONFIGURATION FOR TESTING ===
+import { Profile } from "@/page/Profile"
+// === CONFIGURATION FOR TESTING ===
 const TEST_OWNER_ID = '68fb4bc7ceef7f0d5a7c26b1';
 // ===================================
 
@@ -54,10 +54,21 @@ export default function GymDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="container mx-auto p-6 max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Gym Owner Dashboard</h1>
-          <p className="text-slate-600">Manage your gym, coaches, and athletes</p>
-        </div>
+       <div className="mb-8 flex items-center justify-between">
+  <div>
+    <h1 className="text-4xl font-bold text-slate-900 mb-2">
+      Gym Owner Dashboard
+    </h1>
+    <p className="text-slate-600">
+      Manage your gym, coaches, and athletes
+    </p>
+  </div>
+
+  {/* Profile aligned right */}
+  <div className="flex-shrink-0">
+    <Profile />
+  </div>
+</div>
 
         {!gym ? (
           <Card className="border-2 border-dashed">

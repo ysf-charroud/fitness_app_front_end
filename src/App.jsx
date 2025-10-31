@@ -3,18 +3,22 @@ import router from "./router";
 import { RouterProvider } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./services/redux/slices/authSlice";
+import { ClimbingBoxLoader } from "react-spinners";
 
 const App = () => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.isLoading);
+  const token = useSelector((state) => state.auth.token);
   useEffect(() => {
-    dispatch(fetchUser());
-  }, [dispatch]);
+    if (token) {
+      dispatch(fetchUser());
+    }
+  }, [dispatch, token]);
 
   if (loading)
     return (
       <div className="h-screen  flex justify-center items-center">
-        <div className="bg-red-500">Loading...</div>
+        <ClimbingBoxLoader />
       </div>
     );
 

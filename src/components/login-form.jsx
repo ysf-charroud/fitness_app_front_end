@@ -56,14 +56,11 @@ export function LoginForm({ className /* , ...props */ }) {
       //  Check if account is desactivated
       if (user && user.isActive === false) {
         navigate("/error");
-        //setServerErrors(["This account is not found. Please register a new one."]);
         setLoading(false);
         return; // stop here, no redirect or login
       }
 
-      //  Store Access Token manually in localStorage
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("user", JSON.stringify(user));
+      // Do NOT store Access Token or user info in localStorage anymore!
 
       setSuccessMessage("Login successful!");
 
@@ -71,8 +68,8 @@ export function LoginForm({ className /* , ...props */ }) {
       const roleRedirects = {
         admin: "/dashboard/Admin",
         athlete: "/dashboard/Athlete",
-        coach: "/dashboard/Coach",
-        gym: "/dashboard/Gym",
+        coach: "/coach/programs",
+        gym: "/dashboard/gym",
       };
 
       // Normalize and match role safely
@@ -211,7 +208,7 @@ export function LoginForm({ className /* , ...props */ }) {
           Privacy Policy
         </Link>
         .
-      </FieldDescription>
+        </FieldDescription>
     </div>
   );
 }

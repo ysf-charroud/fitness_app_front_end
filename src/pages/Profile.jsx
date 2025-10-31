@@ -1,23 +1,24 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; // or react-router-dom if not Next.js
-
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser, setToken } from "@/services/redux/slices/authSlice";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  //DropdownMenuPortal,
   DropdownMenuSeparator,
-  //DropdownMenuShortcut,
   DropdownMenuSub,
- // DropdownMenuSubContent,
- // DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 function Profile() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+  const token = useSelector((state) => state.auth.token); // token, if needed
 
   const logout = async () => {
     try {
@@ -29,61 +30,45 @@ function Profile() {
           "Content-Type": "application/json",
         },
       });
-
       if (!res.ok) {
-        // try to read message
         const body = await res.json().catch(() => ({}));
         console.error("Logout failed:", body.message || res.status);
       }
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
-      // clear client-side auth state and redirect
-      try {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("user");
-      } catch {
-          /* ignore */
-        }
+      // Clear Redux state (log out in memory)
+      dispatch(setUser(null));
+      dispatch(setToken(null));
       navigate("/login");
     }
   };
 
   return (
     <div className="p-6">
-        <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <DropdownMenuTrigger>
-         <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>YC</AvatarFallback>
-        </Avatar>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger>
+            <Avatar>
+              <AvatarImage src={user?.avatar || "https://github.com/shadcn.png"} />
+              <AvatarFallback>{user?.username?.[0]?.toUpperCase() || "U"}</AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
         </DropdownMenuTrigger>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="start">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuGroup>
-         <DropdownMenuItem onClick={() => navigate("/profilePage")}>
-            Profile
-        </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-          </DropdownMenuSub>
-          <DropdownMenuItem>
-            New Team
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuItem>Support</DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>
-          Log out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <DropdownMenuContent className="w-56" align="start">
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => navigate("/profilePage")}>Profile</DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuGroup>
+            <DropdownMenuSub />
+          </DropdownMenuGroup>
+          <DropdownMenuItem>Support</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={logout}>Log out</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+     
     </div>
   );
 }
