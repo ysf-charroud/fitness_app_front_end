@@ -1,14 +1,21 @@
-import { createBrowserRouter /* Navigate */ } from "react-router-dom";
-import Home from "./page/Home";
+import { createBrowserRouter } from "react-router";
+import Home from "./pages/Home";
+import AdminLayout from "./components/layout/AdminLayout";
+import Dashboard from "./pages/Dashboard";
+import UsersList from "./pages/UsersList";
+import ProgramsList from "./pages/ProgramsList";
+import CoachesList from "./pages/CoachesList";
+import GymsList from "./pages/GymsList";
+import Transactions from "./pages/Statistics"
 import CoachLayout from "./layout/CoachLayout";
-import ProgramPage from "./page/ProgramPage";
+import ProgramPage from "./pages/ProgramPage";
 
-import Login from "./page/Login";
-import Register from "./page/Register";
-import VerifyEmail from "./page/VerifyEmail";
-import LoginSuccess from "./page/LoginSuccess";
-import ForgotPassword from "./page/Forgotpassword";
-import ResetPassword from "./page/Resetpassword";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
+import LoginSuccess from "./pages/LoginSuccess";
+import ForgotPassword from "./pages/Forgotpassword";
+import ResetPassword from "./pages/Resetpassword";
 // Dashboards
 //import AdminDashboard from "./page/dashboard/Admin";
 import ProfilePage from "./page/ProfilePage";
@@ -19,8 +26,13 @@ import GymDashboard from "./page/dashboard/GymDashboard/Dashboard";
 //import AthleteDashboard from "./page/dashboard/Athlete";
  
 //import CreateProgramPage from "./page/CreateProgramPage";
+//import AdminDashboard from "./pages/dashboard/Admin";
+//import CoachDashboard from "./pages/dashboard/Coach";
+//import AthleteDashboard from "./pages/dashboard/Athlete";
+
+//import CreateProgramPage from "./pages/CreateProgramPage";
 //import MainLayout from "./layout/MainLayout";
-import ErrorSection7 from "./page/ErrorPage";
+import ErrorSection7 from "./pages/ErrorPage";
 import Auth from "./layout/Auth";
 
 const router = createBrowserRouter([
@@ -29,13 +41,25 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   {
+    path: "admin/",
+    element: <AdminLayout />,
+    children: [
+      {index: true, element: <Dashboard/>},
+      {path: "home", element: <Dashboard/>},
+      { path: "athletes", element: <UsersList /> },
+      { path: "programs", element: <ProgramsList /> },
+      { path: "coaches", element: <CoachesList /> },
+      { path: "gyms", element: <GymsList /> },
+      { path: "transactions", element: <Transactions /> },
+    ],
+  },{
     path: "/login",
     element: <Login />,
   },
   {
     path: "/forgot-password",
     element: <ForgotPassword />,
-  },
+  },+
   {
     path: "/dashboard/athlete",
     element: <Athlete />,
