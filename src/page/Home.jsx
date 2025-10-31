@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Marquee } from "@/components/ui/marquee";
 import { cn } from "@/lib/utils";
 import ScrollReveal from "../components/ui/scroll-reveal";
-
+import { motion, AnimatePresence } from "framer-motion";
 // Landing page components
 import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
@@ -145,7 +145,7 @@ const Home = () => {
       <main>
         {/* Hero section doesn't need scroll reveal as it's above the fold */}
         <HeroSection />
-        
+
         <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={0} blurStrength={5}>
           <SearchBar />
         </ScrollReveal>
