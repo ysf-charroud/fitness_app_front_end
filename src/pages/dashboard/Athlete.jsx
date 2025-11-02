@@ -1,4 +1,4 @@
-import {Profile} from "@/page/profile";
+import {Profile} from "@/pages/profile";
 export default function Athlete() {
     return (
         <div>

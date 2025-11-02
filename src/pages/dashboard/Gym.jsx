@@ -1,7 +1,7 @@
 import React from "react";
 import {
   Profile
-} from "@/page/Profile"
+} from "@/pages/Profile"
 export default function GymDashboard() {
   return (
     <div className="p-6">

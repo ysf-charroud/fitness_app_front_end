@@ -5,7 +5,7 @@ import { Building2, Users, UserCog } from 'lucide-react';
 import GymManagement from './GymManagement';
 import CoachesManagement from './CoachesManagement';
 import AthletesManagement from './AthletesManagement';
-import { Profile } from "@/page/Profile"
+import { Profile } from "@/pages/Profile"
 // === CONFIGURATION FOR TESTING ===
 const TEST_OWNER_ID = '68fb4bc7ceef7f0d5a7c26b1';
 // ===================================
