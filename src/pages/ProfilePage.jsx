@@ -132,13 +132,24 @@ function ProfilePage() {
           name: form.name,
           avatar: form.avatar,
         };
-      // Update Redux store first so next page sees fresh data
+      // Update Redux store immediately with server response
       dispatch(setUser(updatedUser));
       setMessage(data.message || "Profile updated successfully");
-      // Refresh from backend to ensure we have canonical data
-      if (token) dispatch(fetchUser());
+      
+      // Refresh from backend to ensure we have canonical data, then redirect
+      let finalUser = updatedUser;
+      if (token) {
+        try {
+          const refreshedUser = await dispatch(fetchUser()).unwrap();
+          finalUser = refreshedUser || updatedUser;
+        } catch (err) {
+          console.error("Failed to refresh user data:", err);
+          // Continue anyway since we already updated Redux with server response
+        }
+      }
+      
       // Role-based redirect after save
-      const role = (updatedUser?.role || "").toLowerCase();
+      const role = (finalUser?.role || "").toLowerCase();
       const roleRedirects = {
         admin: "/dashboard/Admin",
         athlete: "/dashboard/athlete", // matches router path

@@ -67,14 +67,14 @@ export function LoginForm({ className /* , ...props */ }) {
       //  Role-based redirect
       const roleRedirects = {
         admin: "/dashboard/Admin",
-        athlete: "/dashboard/Athlete",
+        athlete: "/dashboard/athlete",
         coach: "/coach/programs",
         gym: "/dashboard/gym",
       };
 
       // Normalize and match role safely
       const userRole = user.role?.toLowerCase();
-      const targetPath = roleRedirects[userRole] || "/dashboard"; // default fallback
+      const targetPath = roleRedirects[userRole] || "/dashboard/athlete"; // default fallback
 
       setTimeout(() => navigate(targetPath), 800);
     } catch (err) {

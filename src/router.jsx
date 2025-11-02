@@ -18,10 +18,10 @@ import ForgotPassword from "./pages/Forgotpassword";
 import ResetPassword from "./pages/Resetpassword";
 // Dashboards
 //import AdminDashboard from "./page/dashboard/Admin";
-import ProfilePage from "./page/ProfilePage";
-import Athlete from "./page/dashboard/Athlete";
+import ProfilePage from "./pages/ProfilePage";
+import Athlete from "./pages/dashboard/Athlete";
 //import CoachDashboard from "./page/dashboard/Coach";
-import GymDashboard from "./page/dashboard/GymDashboard/Dashboard";
+import GymDashboard from "./pages/dashboard/GymDashboard/Dashboard";
 
 //import AthleteDashboard from "./page/dashboard/Athlete";
  
@@ -80,10 +80,10 @@ const router = createBrowserRouter([
     path: "/login-success",
     element: <LoginSuccess />,
   },
-  /* {
+  {
     path: "/dashboard/coach",
-    element: <CoachDashboard />,
-  }, */
+    element: <ProgramPage />,
+  }, 
   {
     path: "/dashboard/gym",
     element: <GymDashboard />,
@@ -96,10 +96,11 @@ const router = createBrowserRouter([
     path: "/error",
     element: <ErrorSection7 />,
   },
- /*  {
+ /*{
     path: "/dashboard/athlete",
     element: <AthleteDashboard />,
-  }, */
+  }, 
+  */
   {
     path: "/reset-password",
     element: <ResetPassword />,

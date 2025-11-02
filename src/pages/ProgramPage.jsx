@@ -5,7 +5,7 @@ import { Search, Filter } from "lucide-react";
 import ProgramCard from "../components/PorgramCard";
 import { CreateProgramForm } from "../components/CreateProgramForm";
 import CoachSideBar from "@/components/CoachSideBar";
-import {Profile} from "@/page/Profile"
+import {Profile} from "@/pages/Profile"
 
   const initialPrograms = [
   {
