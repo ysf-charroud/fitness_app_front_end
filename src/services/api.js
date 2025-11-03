@@ -11,9 +11,10 @@ const api = axios.create({
 // Add request interceptor to include JWT token dynamically
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("jwtAuth");
+    // Get token from Redux store
+    const token = localStorage.getItem("auth_token");
     if (token) {
-      config.headers.Authorization = token;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },

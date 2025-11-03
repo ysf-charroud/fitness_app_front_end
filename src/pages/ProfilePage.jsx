@@ -152,7 +152,7 @@ function ProfilePage() {
       const role = (finalUser?.role || "").toLowerCase();
       const roleRedirects = {
         admin: "/dashboard/Admin",
-        athlete: "/dashboard/athlete", // matches router path
+        athlete: "/",
         coach: "/coach/programs",
         gym: "/dashboard/gym",
       };

@@ -34,6 +34,8 @@ import GymDashboard from "./pages/dashboard/GymDashboard/Dashboard";
 //import MainLayout from "./layout/MainLayout";
 import ErrorSection7 from "./pages/ErrorPage";
 import Auth from "./layout/Auth";
+import AllPrograms from "./pages/AllPrograms";
+import AllCoaches from "./pages/AllCoaches";
 
 const router = createBrowserRouter([
   {
@@ -79,6 +81,14 @@ const router = createBrowserRouter([
   {
     path: "/login-success",
     element: <LoginSuccess />,
+  },
+  {
+    path: "/programs",
+    element: <AllPrograms />,
+  },
+  {
+    path: "/coaches",
+    element: <AllCoaches />,
   },
   {
     path: "/dashboard/coach",
