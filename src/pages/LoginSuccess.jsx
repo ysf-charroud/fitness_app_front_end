@@ -38,7 +38,7 @@ export default function LoginSuccess() {
         const role = user.role?.toLowerCase();
         const roleRedirects = {
           admin: "/dashboard/Admin",
-          athlete: "/dashboard/athlete",
+          athlete: "/",
           coach: "/coach/programs",
           gym: "/dashboard/gym",
         };
@@ -54,7 +54,7 @@ export default function LoginSuccess() {
       dispatch(setToken(token));
       dispatch(fetchUser());
       setMessage("Login successful — redirecting…");
-      setTimeout(() => navigate("/dashboard/athlete"), 1200);
+      setTimeout(() => navigate("/"), 1200);
     } else {
       setMessage("Missing authentication data. Please try again.");
     }
