@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import Home from "./pages/Home";
 import AdminLayout from "./components/layout/AdminLayout";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/AdminDashboard";
 import UsersList from "./pages/UsersList";
 import ProgramsList from "./pages/ProgramsList";
 import CoachesList from "./pages/CoachesList";

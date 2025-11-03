@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Trash2, Eye, MapPin, Phone, Mail, CheckCircle, XCircle } from "lucide-react"; // ✅ Ajout CheckCircle & XCircle
+import { Trash2, Eye, MapPin, Phone, Mail, CheckCircle, XCircle, Globe } from "lucide-react"; // ✅ Ajout CheckCircle & XCircle
 import {
   Table,
   TableBody,
@@ -271,97 +271,146 @@ export default function GymsTable({
       )}
 
       {/* Gym Details Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Gym Details</DialogTitle>
-            <DialogDescription>
-              Complete information about {selectedGym?.name}
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedGym && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16 rounded-sm">
-                  <AvatarFallback className="text-lg bg-blue-100">
-                    {selectedGym.name?.charAt(0) || 'G'}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-lg font-semibold">{selectedGym.name}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    {getStatusBadge(selectedGym.isApproved)}
-                  </div>
-                </div>
+     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogContent className="max-w-5xl p-0 overflow-hidden">
+        <div className="grid md:grid-cols-2 gap-0">
+          {/* Left Side - Image */}
+          <div className="relative bg-muted flex items-center justify-center min-h-[500px]">
+            {selectedGym?.imageUrl ? (
+              <img
+                src={selectedGym.imageUrl}
+                alt={selectedGym.name || 'Gym'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Avatar className="h-48 w-48 rounded-lg">
+                <AvatarFallback className="text-6xl rounded-lg">
+                  {selectedGym?.name?.charAt(0) || 'G'}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            <div className="absolute top-4 left-4">
+              {getStatusBadge(selectedGym?.isApproved)}
+            </div>
+          </div>
+
+          {/* Right Side - Information */}
+          <div className="p-8 overflow-y-auto max-h-[600px]">
+            <div className="space-y-6">
+              {/* Header */}
+              <div>
+                <h2 className="text-2xl font-bold mb-2">{selectedGym?.name}</h2>
+                <p className="text-sm text-muted-foreground">
+                  Complete information about this gym
+                </p>
               </div>
 
               <Separator />
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium mb-2">Location Information</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      <span>{selectedGym.location || selectedGym.address || 'No address'}</span>
-                    </div>
+              {/* Location Information */}
+              {(selectedGym?.location || selectedGym?.address || selectedGym?.city || selectedGym?.country) && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                    Location
+                  </h3>
+                  <div className="space-y-2">
+                    {(selectedGym.location || selectedGym.address) && (
+                      <div className="flex items-start gap-3">
+                        <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm">
+                          {selectedGym.location || selectedGym.address}
+                        </span>
+                      </div>
+                    )}
                     {selectedGym.city && (
-                      <div>City: {selectedGym.city}</div>
+                      <div className="text-sm text-muted-foreground">
+                        City: <span className="text-foreground">{selectedGym.city}</span>
+                      </div>
                     )}
                     {selectedGym.country && (
-                      <div>Country: {selectedGym.country}</div>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-medium mb-2">Contact Information</h4>
-                  <div className="space-y-2 text-sm">
-                    {selectedGym.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4" />
-                        {selectedGym.phone}
-                      </div>
-                    )}
-                    {selectedGym.email && (
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4" />
-                        {selectedGym.email}
-                      </div>
-                    )}
-                    {selectedGym.website && (
-                      <div>
-                        Website: <a href={selectedGym.website} className="text-blue-500 hover:underline">{selectedGym.website}</a>
+                      <div className="text-sm text-muted-foreground">
+                        Country: <span className="text-foreground">{selectedGym.country}</span>
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
-
-              {selectedGym.description && (
-                <div>
-                  <h4 className="font-medium mb-2">Description</h4>
-                  <p className="text-sm text-muted-foreground">{selectedGym.description}</p>
                 </div>
               )}
 
-              {selectedGym.facilities && selectedGym.facilities.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2">Facilities</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedGym.facilities.map((facility, index) => (
-                      <Badge key={index} variant="secondary">
-                        {facility}
-                      </Badge>
-                    ))}
+              {/* Contact Information */}
+              {(selectedGym?.phone || selectedGym?.email || selectedGym?.website) && (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                      Contact
+                    </h3>
+                    <div className="space-y-2">
+                      {selectedGym.phone && (
+                        <div className="flex items-center gap-3">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">{selectedGym.phone}</span>
+                        </div>
+                      )}
+                      {selectedGym.email && (
+                        <div className="flex items-center gap-3">
+                          <Mail className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">{selectedGym.email}</span>
+                        </div>
+                      )}
+                      {selectedGym.website && (
+                        <div className="flex items-center gap-3">
+                          <Globe  cn=" h-4 text-muted-foreground" />
+                          <a 
+                            href={selectedGym.website} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary hover:underline"
+                          >
+                            {selectedGym.website}
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </>
+              )}
+
+              {/* Description */}
+              {selectedGym?.description && (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                      Description
+                    </h3>
+                    <p className="text-sm leading-relaxed">{selectedGym.description}</p>
+                  </div>
+                </>
+              )}
+
+              {/* Facilities */}
+              {selectedGym?.facilities && selectedGym.facilities.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                      Facilities
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedGym.facilities.map((facility, index) => (
+                        <Badge key={index} variant="secondary" className="px-3 py-1">
+                          {facility}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
     </div>
   );
 }

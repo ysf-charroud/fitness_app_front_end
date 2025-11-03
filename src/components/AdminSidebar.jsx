@@ -21,9 +21,11 @@ import {
   Dumbbell,
   ChartNoAxesCombined,
 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const AppSideBar = () => {
   const { open } = useSidebar();
+  const user = useSelector((state) => state.auth.user);
   console.log(open);
   const items = [
     {
@@ -105,8 +107,8 @@ const AppSideBar = () => {
               A
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold">Admin Name</span>
-              <span className="text-sm text-gray-500">admin@example.com</span>
+              <span className="font-semibold">{user?.name}</span>
+              <span className="text-sm text-gray-500">{user?.email}</span>
             </div>
             <button className="ml-auto text-gray-400 hover:text-gray-600">
               •••

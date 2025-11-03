@@ -8,7 +8,7 @@ import {
   fetchRoleDistribution,
   fetchLastTransactions,
   fetchBestPrograms,
-} from "../services/redux/slices/adminSlice";
+} from "../services/redux/slices/adminSlice"; 
 
 // Composants internes
 import DashboardStats from "../components/admin/dashboard/DashboardStats";
