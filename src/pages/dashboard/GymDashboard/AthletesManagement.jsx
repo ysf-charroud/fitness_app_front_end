@@ -51,8 +51,8 @@ export default function AthletesManagement({ gymId }) {
     );
   };
 
-  const activeAthletes = athletes.filter((a) => a.membership_status === 'active');
-  const inactiveAthletes = athletes.filter((a) => a.membership_status !== 'active');
+  const activeAthletes = athletes.filter((a) => a.isActive === true);
+  const inactiveAthletes = athletes.filter((a) => a.isActive !== false);
 
   if (loading) {
     return (
