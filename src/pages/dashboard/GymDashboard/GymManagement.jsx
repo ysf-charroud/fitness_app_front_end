@@ -25,6 +25,7 @@ const TEST_OWNER_ID = '68fb4bc7ceef7f0d5a7c26b1';
 export default function GymManagement({ gym, onGymUpdate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(!gym);
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
 
   // Initialize equipements as object
   const initialEquipements = {};
@@ -41,7 +42,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
     equipements: initialEquipements,
   });
 
-  // Sync formData when gym changes (e.g., after creation)
+  // Sync formData when gym changes
   useEffect(() => {
     if (gym) {
       const newEquipements = {};
@@ -56,6 +57,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
         activities: gym.activities?.join(', ') || '',
         equipements: newEquipements,
       });
+      setSelectedPhotos([]);
     }
   }, [gym]);
 
@@ -74,34 +76,32 @@ export default function GymManagement({ gym, onGymUpdate }) {
   };
 
   const handleSave = async () => {
-    try {
-      const gymData = {
-        name: formData.name,
-        location: formData.location,
-        schedule: formData.schedule,
-        pricing: Number(formData.pricing),
-        activities: formData.activities
-          .split(',')
-          .map((a) => a.trim())
-          .filter(Boolean),
-        equipements: formData.equipements, 
-        owner: TEST_OWNER_ID,
-      };
+    const formDataToSend = new FormData();
 
-      let response;
-      if (gym) {
-        response = await fetch(`http://localhost:5000/api/gyms/${gym._id || gym.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(gymData),
-        });
-      } else {
-        response = await fetch('http://localhost:5000/api/gyms', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(gymData),
-        });
-      }
+    // Append text fields
+    formDataToSend.append('name', formData.name);
+    formDataToSend.append('location', formData.location);
+    formDataToSend.append('schedule', formData.schedule);
+    formDataToSend.append('pricing', formData.pricing.toString());
+    formDataToSend.append('activities', formData.activities);
+    formDataToSend.append('equipements', JSON.stringify(formData.equipements));
+    formDataToSend.append('owner', TEST_OWNER_ID);
+
+    // Append photos
+    selectedPhotos.forEach(photo => {
+      formDataToSend.append('photos', photo);
+    });
+
+    try {
+      const url = gym
+        ? `http://localhost:5000/api/gyms/${gym._id}`
+        : 'http://localhost:5000/api/gyms';
+
+      const response = await fetch(url, {
+        method: gym ? 'PATCH' : 'POST',
+        body: formDataToSend,
+        // ⚠️ Do NOT set Content-Type — browser handles it
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -113,6 +113,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
       toast.success(gym ? 'Gym updated successfully' : 'Gym created successfully');
       setIsEditing(false);
       setIsCreating(false);
+      setSelectedPhotos([]);
     } catch (error) {
       console.error('Save error:', error);
       toast.error(error.message || 'An error occurred while saving');
@@ -122,7 +123,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
   const handleDelete = async () => {
     if (!gym) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/gyms/${gym._id || gym.id}`, {
+      const response = await fetch(`http://localhost:5000/api/gyms/${gym._id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -152,6 +153,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
         activities: gym.activities.join(', '),
         equipements: resetEquipements,
       });
+      setSelectedPhotos([]);
       setIsEditing(false);
     }
   };
@@ -242,6 +244,22 @@ export default function GymManagement({ gym, onGymUpdate }) {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* ✅ Photo Upload */}
+          <div className="space-y-2">
+            <Label>Photos</Label>
+            <Input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => setSelectedPhotos(Array.from(e.target.files))}
+            />
+            {selectedPhotos.length > 0 && (
+              <div className="text-sm text-slate-500">
+                {selectedPhotos.length} photo{selectedPhotos.length !== 1 ? 's' : ''} selected
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2 pt-4">
@@ -339,6 +357,23 @@ export default function GymManagement({ gym, onGymUpdate }) {
             )}
           </div>
         </div>
+
+        {/* ✅ Display existing photos */}
+        {gym.photos && gym.photos.length > 0 && (
+          <div>
+            <h3 className="font-semibold text-sm text-slate-500 mb-2">Photos</h3>
+            <div className="flex flex-wrap gap-2">
+              {gym.photos.map((url, index) => (
+                <img
+                  key={index}
+                  src={url}
+                  alt={`Gym photo ${index + 1}`}
+                  className="w-20 h-20 object-cover rounded border"
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
