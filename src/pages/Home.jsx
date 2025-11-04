@@ -15,16 +15,19 @@ import CTA from "../components/CTA";
 import ContactForm from "../components/ContactForm";
 import Footer from "../components/Footer";
 import ProgramCard from "../components/PorgramCard";
-import api from "@/services/api";
+// Redux-powered data; API calls handled in slices
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Profile } from "@/pages/Profile";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { fetchPrograms } from "@/services/redux/slices/programsSlice";
+import { fetchGyms } from "@/services/redux/slices/gymsSlice";
+import { fetchComments, addComment } from "@/services/redux/slices/commentsSlice";
 
 const initialReviews = [
   {
@@ -113,8 +116,10 @@ const MarqueeDemo = ({ reviews }) => {
 // Coach carousel now fetches from the API inside the component
 
 const Home = () => {
-  const [programs, setPrograms] = useState([]);
-  const [loadingPrograms, setLoadingPrograms] = useState(false);
+  const dispatch = useDispatch();
+  const { items: programs, loading: loadingPrograms, error: programsError } = useSelector((s) => s.programs);
+  const { items: gyms, loading: loadingGyms, error: gymsError } = useSelector((s) => s.gyms);
+  const { items: comments, loading: loadingComments, error: commentsError, adding: addingComment } = useSelector((s) => s.comments);
   const user = useSelector((s) => s.auth.user);
   const [comment, setComment] = useState("");
   const [commentStatus, setCommentStatus] = useState(null);
@@ -122,49 +127,26 @@ const Home = () => {
   const [reviews, setReviews] = useState(initialReviews);
 
   useEffect(() => {
-    let mounted = true;
-    const loadPrograms = async () => {
-      try {
-        setLoadingPrograms(true);
-        const { data } = await api.get("/programs", { params: { page: 1, limit: 12 } });
-        const list = Array.isArray(data) ? data : (data?.programs || data?.data || []);
-        if (mounted) setPrograms(list.slice(0, 6));
-      } catch (e) {
-        if (mounted) setPrograms([]);
-      } finally {
-        if (mounted) setLoadingPrograms(false);
-      }
-    };
-    loadPrograms();
-    return () => { mounted = false };
-  }, []);
+    dispatch(fetchPrograms());
+    dispatch(fetchGyms());
+    dispatch(fetchComments());
+  }, [dispatch]);
 
     // Fetch comments from backend and inject into marquee reviews
   useEffect(() => {
-    let mounted = true;
-    const loadComments = async () => {
-      try {
-        const { data } = await api.get("/comments"); // GET /api/comments (server.js 94-95, comments.route.js 12-13)
-        const list = Array.isArray(data) ? data : (data?.comments || data?.data || []);
-        if (!mounted || !Array.isArray(list)) return;
-        const mapped = list.map((c) => {
-          const userObj = c.user || c.user_id || {};
-          const name = userObj.name || userObj.fullName || "User";
-          return {
-            name,
-            username: `@${String(name).split(" ")[0].toLowerCase()}`,
-            body: c.content || c.text || "",
-            img: userObj.avatar || "https://avatar.vercel.sh/user",
-          };
-        });
-        setReviews((prev) => (mapped.length ? [...mapped, ...prev] : prev));
-      } catch (_) {
-        // ignore errors silently for UX
-      }
-    };
-    loadComments();
-    return () => { mounted = false };
-  }, []);
+    // whenever comments slice updates, rebuild marquee reviews
+    const mapped = (comments || []).map((c) => {
+      const userObj = c.user || c.user_id || {};
+      const name = userObj.name || userObj.fullName || "User";
+      return {
+        name,
+        username: `@${String(name).split(" ")[0].toLowerCase()}`,
+        body: c.content || c.text || "",
+        img: userObj.avatar || "https://avatar.vercel.sh/user",
+      };
+    });
+    setReviews((prev) => [...mapped, ...initialReviews]);
+  }, [comments]);
 
   const isAthlete = (user?.role || "").toLowerCase() === "athlete";
 
@@ -178,14 +160,7 @@ const Home = () => {
       setDialogOpen(true);
       return;
     }
-    try { await api.post("/comments", { content: text }); } catch {}
-    const newReview = {
-      name: user?.name || "User",
-      username: `@${(user?.name || "user").split(" ")[0].toLowerCase()}`,
-      body: text,
-      img: user?.avatar || "https://avatar.vercel.sh/user",
-    };
-    setReviews((prev) => [newReview, ...prev]);
+    await dispatch(addComment(text));
     setComment("");
     setCommentStatus("Thanks for your feedback!");
   };
@@ -198,15 +173,7 @@ const Home = () => {
     if (pending && pending.trim()) {
       const text = pending.trim();
       (async () => {
-        try { await api.post("/comments", { content: text }); } catch {}
-        const newReview = {
-          name: user?.name || "User",
-          username: `@${(user?.name || "user").split(" ")[0].toLowerCase()}`,
-          body: text,
-          img: user?.avatar || "https://avatar.vercel.sh/user",
-        };
-        setReviews((prev) => [newReview, ...prev]);
-        try { localStorage.removeItem("pending_comment"); } catch {}
+        try { await dispatch(addComment(text)); } finally { try { localStorage.removeItem("pending_comment"); } catch {} }
       })();
     }
   }, [user]);
@@ -287,9 +254,43 @@ const Home = () => {
           </section>
         </ScrollReveal>
 
-        {/* Gyms section with more pronounced animation */}
+        {/* Gyms section (dynamic) */}
         <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={5} blurStrength={10}>
-          <GymsSection />
+          <section id="gyms" className="py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">Featured Gyms</h2>
+              {loadingGyms ? (
+                <div className="text-center text-gray-600">Loading gyms...</div>
+              ) : (
+                <>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {gyms.map((gym) => (
+                      <div key={gym._id} className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow">
+                        <div className="relative aspect-[16/10] overflow-hidden">
+                          <img src={(gym.photos && gym.photos[0]) || "https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg?auto=compress&cs=tinysrgb&w=800"} alt={gym.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="p-6">
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">{gym.name}</h3>
+                          {gym.location && (
+                            <p className="text-gray-600 mb-4 flex items-center gap-2">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                              {gym.location}
+                            </p>
+                          )}
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-500">{typeof gym.pricing !== "undefined" ? `$${Number(gym.pricing).toFixed(2)}` : ""}</span>
+                            <Button asChild>
+                              <Link to={`/gyms/${gym._id}`}>Consult</Link>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
         </ScrollReveal>
 
         
