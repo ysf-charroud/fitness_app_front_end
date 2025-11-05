@@ -31,11 +31,9 @@ api.interceptors.response.use(
   async function onRejected(error) {
     const originalRequest = error.config;
 
-    // Access token expired
-    const status = error?.response?.status;
-    const isRefreshCall = originalRequest?.url?.includes("/api/auth/refresh");
-    if (status === 401 && !originalRequest?.sent && !isRefreshCall) {
-      originalRequest.sent = true;
+     // Only handle 401 errors for non-refresh requests that haven't been retried
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
       try {
         const response = await api.post("/api/auth/refresh", {}, { withCredentials: true });
         const { accessToken } = response.data;
