@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
-const useChanged = ({ state }) => {
+const useChanged = (state) => {
   useEffect(() => {
     console.log(state);
   }, [state]);

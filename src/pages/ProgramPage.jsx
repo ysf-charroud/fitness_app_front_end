@@ -1,17 +1,20 @@
+import { useEffect, useState } from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { CreateProgramForm } from "@/components/CreateProgramForm";
+import { ProgramForm } from "@/components/ProgramForm";
 import useFetchPrograms from "@/hooks/useFetchPrograms";
 import ProgramFilters from "@/components/programs/ProgramFilters";
 import ProgramGrid from "@/components/programs/ProgramGrid";
 import ProgramPagination from "@/components/programs/ProgramPagination";
-import api from "@/services/axios/axiosClient";
-import { toast } from "sonner";
 
 export default function ProgramPage() {
   const {
     programs,
     searchQuery,
     activeFilter,
+    periodMin,
+    periodMax,
+    priceMin,
+    priceMax,
     page,
     total,
     totalPages,
@@ -21,40 +24,28 @@ export default function ProgramPage() {
     error,
     setSearchQuery,
     setActiveFilter,
+    onPeriodChange,
+    onPriceChange,
     goToPage,
     nextPage,
     previousPage,
-    refetch,
+    createProgram,
+    updateProgram,
+    deleteProgram,
   } = useFetchPrograms();
 
-  const handleProgramCreate = async () => {
-    try {
-      // Refetch programs to get updated list
-      await refetch();
-      toast.success("Program created successfully!");
-    } catch {
-      toast.error("Failed to refresh programs list");
-    }
-  };
+  const [selectedProgram, setSelectedProgram] = useState(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
-  const handleUpdate = (program) => {
-    // TODO: Implement edit functionality
-    toast.info(`Edit program: ${program.title}`);
-  };
-
-  const handleDelete = async (program) => {
-    if (!confirm(`Are you sure you want to delete "${program.title}"?`)) {
-      return;
+  useEffect(() => {
+    if (!sheetOpen) {
+      setSelectedProgram(null);
     }
+  }, [sheetOpen]);
 
-    try {
-      await api.delete(`/api/programs/${program._id}`);
-      toast.success("Program deleted successfully");
-      await refetch();
-    } catch (error) {
-      console.error("Error deleting program:", error);
-      toast.error("Failed to delete program");
-    }
+  const showUpdateForm = (program) => {
+    setSelectedProgram(program);
+    setSheetOpen(true);
   };
 
   return (
@@ -71,15 +62,27 @@ export default function ProgramPage() {
             Manage your fitness programs with ease
           </p>
         </div>
-        <CreateProgramForm onProgramCreate={handleProgramCreate} />
+        <ProgramForm
+          createProgram={createProgram}
+          updateProgram={updateProgram}
+          initialValues={selectedProgram || undefined}
+          sheetOpen={sheetOpen}
+          setSheetOpen={setSheetOpen}
+        />
       </div>
 
       {/* Filters */}
       <ProgramFilters
         searchQuery={searchQuery}
         activeFilter={activeFilter}
+        periodMin={periodMin}
+        periodMax={periodMax}
+        priceMin={priceMin}
+        priceMax={priceMax}
         onSearchChange={setSearchQuery}
         onFilterChange={setActiveFilter}
+        onPeriodChange={onPeriodChange}
+        onPriceChange={onPriceChange}
       />
 
       {/* Error Message */}
@@ -93,8 +96,9 @@ export default function ProgramPage() {
       <ProgramGrid
         programs={programs}
         loading={loading}
-        onUpdate={handleUpdate}
-        onDelete={handleDelete}
+        showUpdateForm={showUpdateForm}
+        updateProgram={updateProgram}
+        deleteProgram={deleteProgram}
       />
 
       {/* Pagination */}

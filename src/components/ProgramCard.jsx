@@ -4,6 +4,7 @@ import {
   Trash2Icon,
   Users,
   TrendingUp,
+  Download,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,50 +21,32 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import api from "@/services/axios/axiosClient";
 import { toast } from "sonner";
 
-const ProgramCard = ({ program, onUpdate, onDelete }) => {
+const ProgramCard = ({ program, showUpdateForm, updateProgram, deleteProgram }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [localActive, setLocalActive] = useState(Boolean(program?.active));
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const programId = useMemo(() => program?._id || program?.id, [program]);
 
   const handleToggleActive = async () => {
-    const nextActive = !localActive;
     try {
-      await api.patch(`/api/programs/${programId}`, { active: nextActive });
-      setLocalActive(nextActive);
-      toast.success(`Program ${nextActive ? "activated" : "deactivated"}`);
+      const { active } = await updateProgram(programId, {
+        active: !program.active,
+      });
+      toast.success(`Program ${active ? "activated" : "deactivated"}`);
     } catch {
       toast.error("Failed to update program status");
     }
-  };
-
-  const handleUpdate = (e) => {
-    e.stopPropagation();
-    if (onUpdate) {
-      onUpdate();
-    }
-  };
-
-  const handleDelete = (e) => {
-    e.stopPropagation();
-    if (program?.bought_by?.length) {
-      toast.warning("This program has purchases and cannot be deleted");
-      return;
-    }
-    setConfirmOpen(true);
   };
 
   const confirmDelete = async () => {
     if (!programId) return;
     setIsDeleting(true);
     try {
-      await api.delete(`/api/programs/${programId}`);
+      await deleteProgram(programId);
       toast.success("Program deleted");
-      onDelete?.(program);
     } catch {
       toast.error("Failed to delete program");
     } finally {
@@ -81,6 +64,36 @@ const ProgramCard = ({ program, onUpdate, onDelete }) => {
     });
   };
 
+  const handleDownload = async () => {
+    const fileUrl = program.file;
+    if (!fileUrl) return;
+
+    setIsDownloading(true);
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error("Failed to fetch file");
+      
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = program.title ? `${program.title}.pdf` : "program.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      window.URL.revokeObjectURL(blobUrl);
+      
+      toast.success("Program file downloaded successfully");
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download program file");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="group relative flex flex-col rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 hover:-translate-y-1 max-w-sm border bg-card text-card-foreground dark:bg-neutral-900 dark:text-white border-border dark:border-neutral-800">
       <div className="relative w-full h-64 overflow-hidden">
@@ -90,28 +103,30 @@ const ProgramCard = ({ program, onUpdate, onDelete }) => {
           alt={program.title || "Program"}
           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-105"
           onError={(e) => {
-            e.target.src = "/placeholder-program.jpg";
+            e.target.src = "/program-placeholder.png";
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent dark:from-neutral-900 dark:via-neutral-900/60" />
 
-        <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0">
-          <Badge className="h-7 px-3 bg-green-500/90 backdrop-blur-md hover:bg-green-500 border-0 rounded-full shadow-lg text-white">
-            <TrendingUp className="w-3.5 h-3.5 mr-1.5 text-white" />
-            <span className="text-xs font-bold text-white">Popular</span>
-          </Badge>
-        </div>
+        {program.bought_by?.length >= 5 && (
+          <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0">
+            <Badge className="h-7 px-3 bg-green-500/90 backdrop-blur-md hover:bg-green-500 border-0 rounded-full shadow-lg text-white">
+              <TrendingUp className="w-3.5 h-3.5 mr-1.5 text-white" />
+              <span className="text-xs font-bold text-white">Popular</span>
+            </Badge>
+          </div>
+        )}
 
         <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[10px] group-hover:translate-x-0 z-10">
           <Button
             size="icon"
             onClick={handleToggleActive}
             className={`h-9 w-9 rounded-full shadow-md cursor-pointer transition-all duration-300 hover:scale-110 ${
-              localActive
+              program.active
                 ? "bg-green-500 hover:bg-green-600 text-white"
                 : "bg-muted hover:bg-muted/80 text-foreground"
             }`}
-            title={localActive ? "Deactivate" : "Activate"}
+            title={program.active ? "Deactivate" : "Activate"}
           >
             <CheckIcon className="w-4 h-4" />
           </Button>
@@ -119,7 +134,7 @@ const ProgramCard = ({ program, onUpdate, onDelete }) => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleUpdate}
+            onClick={() => showUpdateForm(program)}
             className="h-9 w-9 bg-white/70 cursor-pointer text-black hover:bg-white rounded-full transition-all duration-300 hover:scale-110 dark:bg-white/10 dark:text-white dark:hover:bg-white/25"
             title="Edit program"
           >
@@ -132,7 +147,7 @@ const ProgramCard = ({ program, onUpdate, onDelete }) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={handleDelete}
+                  onClick={() => setConfirmOpen(true)}
                   className="h-9 w-9 bg-white/70 cursor-pointer text-black hover:bg-red-500 hover:text-white rounded-full transition-all duration-300 hover:scale-110 dark:bg-white/10 dark:text-white"
                   title="Delete program"
                 >
@@ -267,9 +282,16 @@ const ProgramCard = ({ program, onUpdate, onDelete }) => {
           </div>
         )}
 
-        <Button className="w-full h-11 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-          View Details
-        </Button>
+        {(program.file) && (
+          <Button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {isDownloading ? "Downloading..." : "Download Program File"}
+          </Button>
+        )}
       </div>
     </div>
   );

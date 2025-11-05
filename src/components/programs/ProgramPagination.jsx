@@ -63,7 +63,7 @@ const ProgramPagination = ({
   return (
     <div className="mt-8 space-y-4">
       <div className="text-sm text-muted-foreground text-center">
-        Showing {startIndex + 1} to {Math.min(endIndex + 1, total)} of {total} programs
+        Showing {startIndex + 1} to {Math.min(endIndex, total)} of {total} programs
       </div>
       
       <Pagination>

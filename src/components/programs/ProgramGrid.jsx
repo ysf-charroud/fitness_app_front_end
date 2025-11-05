@@ -1,6 +1,6 @@
 import ProgramCard from "@/components/ProgramCard";
 
-const ProgramGrid = ({ programs, loading, onUpdate, onDelete }) => {
+const ProgramGrid = ({ programs, loading, updateProgram, showUpdateForm, deleteProgram }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -28,10 +28,11 @@ const ProgramGrid = ({ programs, loading, onUpdate, onDelete }) => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {programs.map((program) => (
         <ProgramCard
-          key={program._id}
+          key={program._id || program.id}
           program={program}
-          onUpdate={() => onUpdate(program)}
-          onDelete={() => onDelete(program)}
+          showUpdateForm={showUpdateForm}
+          deleteProgram={deleteProgram}
+          updateProgram={updateProgram}
         />
       ))}
     </div>
