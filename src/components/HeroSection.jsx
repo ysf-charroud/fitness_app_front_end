@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 const HeroSection = () => {
   return (
@@ -13,10 +14,9 @@ const HeroSection = () => {
               Connect with elite coaches and discover premier gyms tailored to your goals. Achieve your peak performance with personalized guidance.
             </p>
             
-            <InteractiveHoverButton>
-                Find Your Coach
+            <InteractiveHoverButton asChild>
+               <Link to="/coaches"> Find Your Coach</Link>
             </InteractiveHoverButton>
-
           </div>
 
           <div className="relative">

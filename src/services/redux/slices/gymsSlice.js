@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import api from "@/services/api";
+import api from "@/services/axios/axiosClient";
 
 export const fetchGyms = createAsyncThunk(
   "gyms/fetchGyms",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await api.get("/gyms", { params: { page: 1, limit: 50 } });
+      const { data } = await api.get("/api/gyms", { params: { page: 1, limit: 50 } });
       return Array.isArray(data) ? data : (data?.gyms || data?.data || []);
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);

@@ -68,6 +68,11 @@ const router = createBrowserRouter([
     element: <Athlete />,
   },
   {
+    path: "/gyms",
+    element: <GymsList />,
+  },
+
+  {
     path: "/reset-password/:token",
     element: <ResetPassword />,
   },
