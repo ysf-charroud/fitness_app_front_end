@@ -6,6 +6,7 @@ import ProgramFilters from "@/components/programs/ProgramFilters";
 import ProgramGrid from "@/components/programs/ProgramGrid";
 import ProgramPagination from "@/components/programs/ProgramPagination";
 
+
 export default function ProgramPage() {
   const {
     programs,

@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Marquee } from "@/components/ui/marquee";
 import { cn } from "@/lib/utils";
 import ScrollReveal from "../components/ui/scroll-reveal";
-
+import { motion, AnimatePresence } from "framer-motion";
 // Landing page components
 import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
@@ -14,8 +14,22 @@ import GymsSection from "../components/GymsSection";
 import CTA from "../components/CTA";
 import ContactForm from "../components/ContactForm";
 import Footer from "../components/Footer";
+import ProgramCard from "../components/PorgramCard";
+// Redux-powered data; API calls handled in slices
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { Profile } from "@/pages/Profile";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { fetchPrograms } from "@/services/redux/slices/programsSlice";
+import { fetchGyms } from "@/services/redux/slices/gymsSlice";
+import { fetchComments, addComment } from "@/services/redux/slices/commentsSlice";
 
-const reviews = [
+const initialReviews = [
   {
     name: "Jack",
     username: "@jack",
@@ -54,9 +68,6 @@ const reviews = [
   },
 ];
 
-const firstRow = reviews.slice(0, reviews.length / 2);
-const secondRow = reviews.slice(reviews.length / 2);
-
 const ReviewCard = ({ img, name, username, body }) => (
   <figure
     className={cn(
@@ -76,102 +87,212 @@ const ReviewCard = ({ img, name, username, body }) => (
     </div>
     <blockquote className="mt-2 text-sm">{body}</blockquote>
   </figure>
-);
+); 
 
-const MarqueeDemo = () => (
-  <div className="relative flex w-full flex-col items-center justify-center overflow-hidden py-10">
-     <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
-          Explore Our custemers reviews
-        </h2>
-    <Marquee pauseOnHover className="[--duration:20s]">
-      {firstRow.map((review) => (
-        <ReviewCard key={review.username} {...review} />
-      ))}
-    </Marquee>
-    <Marquee reverse pauseOnHover className="[--duration:20s]">
-      {secondRow.map((review) => (
-        <ReviewCard key={review.username} {...review} />
-      ))}
-    </Marquee>
+const MarqueeDemo = ({ reviews }) => {
+  const firstRow = reviews.slice(0, Math.ceil(reviews.length / 2));
+  const secondRow = reviews.slice(Math.ceil(reviews.length / 2));
+  return (
+    <div className="relative flex w-full flex-col items-center justify-center overflow-hidden py-10">
+      <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
+        Explore Our customers reviews
+      </h2>
+      <Marquee pauseOnHover className="[--duration:20s]">
+        {firstRow.map((review, idx) => (
+          <ReviewCard key={`${review.username || review.name}-${idx}`} {...review} />
+        ))}
+      </Marquee>
+      <Marquee reverse pauseOnHover className="[--duration:20s]">
+        {secondRow.map((review, idx) => (
+          <ReviewCard key={`${review.username || review.name}-b-${idx}`} {...review} />
+        ))}
+      </Marquee>
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-white dark:from-background"></div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-white dark:from-background"></div>
+    </div>
+  );
+};
 
-    {/* gradient fade edges */}
-    <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-white dark:from-background"></div>
-    <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-white dark:from-background"></div>
-  </div>
-);
-
-const testimonials = [
-  {
-    quote:
-      "The attention to detail and innovative features have completely transformed our workflow. This is exactly what we've been looking for.",
-    name: "Sarah Chen",
-    designation: "Product Manager at TechFlow",
-    src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=3560&auto=format&fit=crop",
-  },
-  {
-    quote:
-      "Implementation was seamless and the results exceeded our expectations. The platform's flexibility is remarkable.",
-    name: "Michael Rodriguez",
-    designation: "CTO at InnovateSphere",
-    src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=3540&auto=format&fit=crop",
-  },
-  {
-    quote:
-      "This solution has significantly improved our team's productivity. The intuitive interface makes complex tasks simple.",
-    name: "Emily Watson",
-    designation: "Operations Director at CloudScale",
-    src: "https://images.unsplash.com/photo-1623582854588-d60de57fa33f?q=80&w=3540&auto=format&fit=crop",
-  },
-  {
-    quote:
-      "Outstanding support and robust features. It's rare to find a product that delivers on all its promises.",
-    name: "James Kim",
-    designation: "Engineering Lead at DataPro",
-    src: "https://images.unsplash.com/photo-1636041293178-808a6762ab39?q=80&w=3464&auto=format&fit=crop",
-  },
-  {
-    quote:
-      "The scalability and performance have been game-changing for our organization. Highly recommend to any growing business.",
-    name: "Lisa Thompson",
-    designation: "VP of Technology at FutureNet",
-    src: "https://images.unsplash.com/photo-1624561172888-ac93c696e10c?q=80&w=2592&auto=format&fit=crop",
-  },
-];
+// Coach carousel now fetches from the API inside the component
 
 const Home = () => {
+  const dispatch = useDispatch();
+  const { items: programs, loading: loadingPrograms, error: programsError } = useSelector((s) => s.programs);
+  const { items: gyms, loading: loadingGyms, error: gymsError } = useSelector((s) => s.gyms);
+  const { items: comments, loading: loadingComments, error: commentsError, adding: addingComment } = useSelector((s) => s.comments);
+  const user = useSelector((s) => s.auth.user);
+  const [comment, setComment] = useState("");
+  const [commentStatus, setCommentStatus] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [reviews, setReviews] = useState(initialReviews);
+
+  useEffect(() => {
+    dispatch(fetchPrograms());
+    dispatch(fetchGyms());
+    dispatch(fetchComments());
+  }, [dispatch]);
+
+    // Fetch comments from backend and inject into marquee reviews
+  useEffect(() => {
+    // whenever comments slice updates, rebuild marquee reviews
+    const mapped = (comments || []).map((c) => {
+      const userObj = c.user || c.user_id || {};
+      const name = userObj.name || userObj.fullName || "User";
+      return {
+        name,
+        username: `@${String(name).split(" ")[0].toLowerCase()}`,
+        body: c.content || c.text || "",
+        img: userObj.avatar || "https://avatar.vercel.sh/user",
+      };
+    });
+    setReviews((prev) => [...mapped, ...initialReviews]);
+  }, [comments]);
+
+  const isAthlete = (user?.role || "").toLowerCase() === "athlete";
+
+  const submitComment = async (e) => {
+    e?.preventDefault();
+    setCommentStatus(null);
+    const text = comment.trim();
+    if (!text) return;
+    if (!user) {
+      try { localStorage.setItem("pending_comment", text); } catch {}
+      setDialogOpen(true);
+      return;
+    }
+    await dispatch(addComment(text));
+    setComment("");
+    setCommentStatus("Thanks for your feedback!");
+  };
+
+  // Post a pending comment after login and add to marquee
+  useEffect(() => {
+    if (!user) return;
+    let pending = null;
+    try { pending = localStorage.getItem("pending_comment"); } catch {}
+    if (pending && pending.trim()) {
+      const text = pending.trim();
+      (async () => {
+        try { await dispatch(addComment(text)); } finally { try { localStorage.removeItem("pending_comment"); } catch {} }
+      })();
+    }
+  }, [user]);
+
   return (
     <div className="min-h-screen bg-white dark:bg-black">
       <Header />
       <main>
         {/* Hero section doesn't need scroll reveal as it's above the fold */}
         <HeroSection />
-        
+
+{/* 
         <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={0} blurStrength={5}>
           <SearchBar />
-        </ScrollReveal>
+        </ScrollReveal> */}
 
         <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={3} blurStrength={8}>
           <WhyChooseUs />
         </ScrollReveal>
 
-        {/* Testimonials with subtle animation */}
+        {/* Coaches carousel (fetches from API) */}
         <ScrollReveal baseOpacity={0} enableBlur={false} baseRotation={2} blurStrength={0}>
           <section className="py-16">
-            <AnimatedTestimonials testimonials={testimonials} />
+            <AnimatedTestimonials fetchCoaches />
           </section>
         </ScrollReveal>
 
         {/* Marquee section with fade-in only */}
         <ScrollReveal baseOpacity={0} enableBlur={false} baseRotation={0} blurStrength={0}>
           <section className="py-16">
-            <MarqueeDemo />
+            <MarqueeDemo reviews={reviews} />
           </section>
         </ScrollReveal>
 
-        {/* Gyms section with more pronounced animation */}
-        <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={5} blurStrength={10}>
-          <GymsSection />
+        {/* Programs section */}
+        <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={3} blurStrength={8}>
+          <section id="programs" className="py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">Trending Programs</h2>
+              {loadingPrograms ? (
+                <div className="text-center text-gray-600">Loading programs...</div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {programs.map((program, idx) => (
+                      <ProgramCard key={program._id || idx} program={program} />
+                    ))}
+                  </div>
+                  <div className="mt-10 flex justify-center">
+                    <Button asChild>
+                      <Link to="/programs">View More</Link>
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
         </ScrollReveal>
+
+        {/* Gyms section (dynamic) */}
+        <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={5} blurStrength={10}>
+          <section id="gyms" className="py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">Featured Gyms</h2>
+              {loadingGyms ? (
+                <div className="text-center text-gray-600">Loading gyms...</div>
+              ) : (
+                <>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {gyms.map((gym) => (
+                      <div key={gym._id} className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow">
+                        <div className="relative aspect-[16/10] overflow-hidden">
+                          <img src={(gym.photos && gym.photos[0]) || "https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg?auto=compress&cs=tinysrgb&w=800"} alt={gym.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="p-6">
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">{gym.name}</h3>
+                          {gym.location && (
+                            <p className="text-gray-600 mb-4 flex items-center gap-2">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                              {gym.location}
+                            </p>
+                          )}
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-500">{typeof gym.pricing !== "undefined" ? `$${Number(gym.pricing).toFixed(2)}` : ""}</span>
+                            <Button asChild>
+                              <Link to={`/gyms/${gym._id}`}>Consult</Link>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* Profile (if logged in) & public comment box */}
+        <section className="py-10">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Leave a Comment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={submitComment} className="space-y-3">
+                  <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Share your thoughts..." />
+                  <div className="flex justify-end">
+                    <Button type="submit" disabled={!comment.trim()}>Add Comment</Button>
+                  </div>
+                  {commentStatus && (
+                    <p className="text-sm text-green-600">{commentStatus}</p>
+                  )}
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
 
         {/* CTA with attention-grabbing animation */}
         <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={4} blurStrength={7}>
@@ -183,6 +304,23 @@ const Home = () => {
           <ContactForm />
         </ScrollReveal>
       </main>
+      {/* Auth required dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign in required</DialogTitle>
+            <DialogDescription>
+              You need to register or log in before adding a comment. Once authenticated, we will post your comment automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <div className="flex gap-2 justify-end w-full">
+              <Button asChild variant="outline"><Link to="/register">Register</Link></Button>
+              <Button asChild><Link to="/login">Log in</Link></Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Footer />
     </div>
   );

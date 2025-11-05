@@ -56,28 +56,25 @@ export function LoginForm({ className /* , ...props */ }) {
       //  Check if account is desactivated
       if (user && user.isActive === false) {
         navigate("/error");
-        //setServerErrors(["This account is not found. Please register a new one."]);
         setLoading(false);
         return; // stop here, no redirect or login
       }
 
-      //  Store Access Token manually in localStorage
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("user", JSON.stringify(user));
+      // Do NOT store Access Token or user info in localStorage anymore!
 
       setSuccessMessage("Login successful!");
 
       //  Role-based redirect
       const roleRedirects = {
         admin: "/dashboard/Admin",
-        athlete: "/dashboard/Athlete",
-        coach: "/dashboard/Coach",
-        gym: "/dashboard/Gym",
+        athlete: "/dashboard/athlete",
+        coach: "/coach/programs",
+        gym: "/dashboard/gym",
       };
 
       // Normalize and match role safely
       const userRole = user.role?.toLowerCase();
-      const targetPath = roleRedirects[userRole] || "/dashboard"; // default fallback
+      const targetPath = roleRedirects[userRole] || "/dashboard/athlete"; // default fallback
 
       setTimeout(() => navigate(targetPath), 800);
     } catch (err) {
@@ -211,7 +208,7 @@ export function LoginForm({ className /* , ...props */ }) {
           Privacy Policy
         </Link>
         .
-      </FieldDescription>
+        </FieldDescription>
     </div>
   );
 }

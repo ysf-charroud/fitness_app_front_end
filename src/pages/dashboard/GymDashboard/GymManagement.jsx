@@ -1,3 +1,4 @@
+// src/pages/dashboard/GymManagement.jsx
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Edit2, Trash2, Save, X, Check } from 'lucide-react';
+// --- ADDED FOR LIGHTBOX ---
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Edit2, Trash2, Save, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+// --- END ADDED ---
 import { toast } from 'sonner';
 import { EQUIPMENT_LIST } from '@/constants/equipments';
 
@@ -32,6 +40,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
     initialEquipements[item.id] = gym?.equipements?.[item.id] || false;
   });
 
+  // State for form data
   const [formData, setFormData] = useState({
     name: gym?.name || '',
     location: gym?.location || '',
@@ -41,7 +50,17 @@ export default function GymManagement({ gym, onGymUpdate }) {
     equipements: initialEquipements,
   });
 
-  // Sync formData when gym changes (e.g., after creation)
+  // State for managing photos
+  const [existingPhotos, setExistingPhotos] = useState(gym?.photos || []);
+  const [newlySelectedPhotos, setNewlySelectedPhotos] = useState([]); // Stores File objects
+  const [photosToRemove, setPhotosToRemove] = useState([]); // Stores URLs of existing photos to remove
+
+  // --- ADDED FOR LIGHTBOX ---
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  // --- END ADDED ---
+
+  // Sync form data and existing photos when gym changes
   useEffect(() => {
     if (gym) {
       const newEquipements = {};
@@ -56,7 +75,27 @@ export default function GymManagement({ gym, onGymUpdate }) {
         activities: gym.activities?.join(', ') || '',
         equipements: newEquipements,
       });
+      setExistingPhotos(gym.photos || []);
+    } else {
+      setFormData({
+        name: '',
+        location: '',
+        schedule: '',
+        pricing: 0,
+        activities: '',
+        equipements: EQUIPMENT_LIST.reduce((acc, item) => {
+          acc[item.id] = false;
+          return acc;
+        }, {}),
+      });
+      setExistingPhotos([]);
     }
+    // Reset new selections and removals when switching between edit/create or on cancel
+    setNewlySelectedPhotos([]);
+    setPhotosToRemove([]);
+    // --- ADDED FOR LIGHTBOX ---
+    setLightboxOpen(false); // Close lightbox when switching modes or cancelling
+    // --- END ADDED ---
   }, [gym]);
 
   const handleInputChange = (field, value) => {
@@ -73,35 +112,96 @@ export default function GymManagement({ gym, onGymUpdate }) {
     }));
   };
 
-  const handleSave = async () => {
-    try {
-      const gymData = {
-        name: formData.name,
-        location: formData.location,
-        schedule: formData.schedule,
-        pricing: Number(formData.pricing),
-        activities: formData.activities
-          .split(',')
-          .map((a) => a.trim())
-          .filter(Boolean),
-        equipements: formData.equipements, 
-        owner: TEST_OWNER_ID,
-      };
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    // Add new files to the list of newly selected photos
+    setNewlySelectedPhotos(prev => [...prev, ...files]);
+  };
 
-      let response;
-      if (gym) {
-        response = await fetch(`http://localhost:5000/api/gyms/${gym._id || gym.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(gymData),
-        });
-      } else {
-        response = await fetch('http://localhost:5000/api/gyms', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(gymData),
-        });
-      }
+  const removeNewlySelectedPhoto = (indexToRemove) => {
+    setNewlySelectedPhotos(prev => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  const removeExistingPhoto = (urlToRemove) => {
+    setExistingPhotos(prev => prev.filter(url => url !== urlToRemove));
+    setPhotosToRemove(prev => [...prev, urlToRemove]); // Mark for removal on save
+  };
+
+  // --- ADDED FOR LIGHTBOX ---
+  const openLightbox = (index) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
+
+  const goToPrevious = () => {
+    setLightboxIndex(prevIndex => (prevIndex > 0 ? prevIndex - 1 : existingPhotos.length + newlySelectedPhotos.length - 1));
+  };
+
+  const goToNext = () => {
+    setLightboxIndex(prevIndex => (prevIndex < existingPhotos.length + newlySelectedPhotos.length - 1 ? prevIndex + 1 : 0));
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      closeLightbox();
+    } else if (e.key === 'ArrowLeft') {
+      goToPrevious();
+    } else if (e.key === 'ArrowRight') {
+      goToNext();
+    }
+  };
+
+  // Get the list of all photos (existing + newly selected) for lightbox navigation
+  const allPhotos = [...existingPhotos, ...newlySelectedPhotos.map(f => URL.createObjectURL(f))];
+
+  // --- END ADDED ---
+
+  const handleSave = async () => {
+    const formDataToSend = new FormData();
+
+    // Append text fields
+    formDataToSend.append('name', formData.name);
+    formDataToSend.append('location', formData.location);
+    formDataToSend.append('schedule', formData.schedule);
+    formDataToSend.append('pricing', formData.pricing.toString());
+    formDataToSend.append('activities', formData.activities);
+    formDataToSend.append('equipements', JSON.stringify(formData.equipements));
+    formDataToSend.append('owner', TEST_OWNER_ID);
+
+    // --- CRITICAL PART: Send the final list of existing photos to keep ---
+    // The `existingPhotos` state in the frontend should now reflect the list
+    // after the user has clicked the 'X' button on photos they want to remove.
+    // We send this final list to the backend.
+    // It's important to send only the URLs, not the File objects from `newlySelectedPhotos`.
+    // The backend will handle the new uploads from `req.files`.
+    // Calculate the final list: the ones the user wants to keep from the existing list.
+    // `existingPhotos` state is updated by `removeExistingPhoto` function when 'X' is clicked.
+    // So, `existingPhotos` at this point should be the list of URLs to keep.
+    const existingPhotosToKeep = existingPhotos.filter(url => url && typeof url === 'string');
+    console.log("Sending finalPhotos to backend:", existingPhotosToKeep); // Debug log
+    formDataToSend.append('finalPhotos', JSON.stringify(existingPhotosToKeep));
+    // --- END CRITICAL PART ---
+
+    // Append newly selected photos (these will be processed by Multer on the backend)
+    // These will be added to the list provided by `finalPhotos`.
+    newlySelectedPhotos.forEach(photo => {
+      formDataToSend.append('photos', photo); // Append File object
+    });
+
+    try {
+      const url = gym
+        ? `http://localhost:5000/api/gyms/${gym._id}`
+        : 'http://localhost:5000/api/gyms';
+
+      const response = await fetch(url, {
+        method: gym ? 'PATCH' : 'POST',
+        body: formDataToSend,
+        // Do NOT set Content-Type — browser handles it
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -109,10 +209,13 @@ export default function GymManagement({ gym, onGymUpdate }) {
       }
 
       const savedGym = await response.json();
+
       onGymUpdate(savedGym);
+
       toast.success(gym ? 'Gym updated successfully' : 'Gym created successfully');
       setIsEditing(false);
       setIsCreating(false);
+      // States are reset by the useEffect triggered by the gym update
     } catch (error) {
       console.error('Save error:', error);
       toast.error(error.message || 'An error occurred while saving');
@@ -122,7 +225,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
   const handleDelete = async () => {
     if (!gym) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/gyms/${gym._id || gym.id}`, {
+      const response = await fetch(`http://localhost:5000/api/gyms/${gym._id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -139,6 +242,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
   };
 
   const handleCancel = () => {
+    // Reset form data, existing photos, and selections to original state
     if (gym) {
       const resetEquipements = {};
       EQUIPMENT_LIST.forEach(item => {
@@ -152,8 +256,27 @@ export default function GymManagement({ gym, onGymUpdate }) {
         activities: gym.activities.join(', '),
         equipements: resetEquipements,
       });
-      setIsEditing(false);
+      setExistingPhotos(gym.photos || []); // Reset to original photos
+    } else {
+      setFormData({
+        name: '',
+        location: '',
+        schedule: '',
+        pricing: 0,
+        activities: '',
+        equipements: EQUIPMENT_LIST.reduce((acc, item) => {
+          acc[item.id] = false;
+          return acc;
+        }, {}),
+      });
+      setExistingPhotos([]);
     }
+    setNewlySelectedPhotos([]); // Clear new selections
+    setPhotosToRemove([]); // Clear removals
+    // --- ADDED FOR LIGHTBOX ---
+    setLightboxOpen(false); // Close lightbox when cancelling
+    // --- END ADDED ---
+    setIsEditing(false);
   };
 
   if (isCreating || isEditing) {
@@ -165,7 +288,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
             {gym ? 'Update your gym information' : 'Fill in the details to create your gym'}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6"> {/* Increased space-y for clarity */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Gym Name</Label>
@@ -242,6 +365,159 @@ export default function GymManagement({ gym, onGymUpdate }) {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Photo Management Section */}
+          <div className="space-y-4">
+            <Label>Photos</Label>
+            {/* Input for new photos */}
+            <div className="space-y-2">
+              <Input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              {newlySelectedPhotos.length > 0 && (
+                <div className="text-sm text-slate-500">
+                  {newlySelectedPhotos.length} new photo{newlySelectedPhotos.length !== 1 ? 's' : ''} selected
+                </div>
+              )}
+            </div>
+
+            {/* Display newly selected photos with remove option */}
+            {newlySelectedPhotos.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-2">Newly Selected Photos:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {newlySelectedPhotos.map((file, index) => (
+                    <div key={index} className="relative group">
+                      {/* --- LIGHTBOX WRAPPER FOR NEW PHOTOS --- */}
+                      <Dialog open={lightboxOpen && lightboxIndex === existingPhotos.length + index} onOpenChange={(open) => {
+                          if (!open) closeLightbox();
+                      }}>
+                        <DialogTrigger asChild>
+                          <img
+                            src={URL.createObjectURL(file)} // Create a preview URL for the File object
+                            alt={`New ${index + 1}`}
+                            className="w-20 h-20 object-cover rounded border cursor-pointer" // Added cursor-pointer
+                            onClick={() => openLightbox(existingPhotos.length + index)} // Open lightbox for this photo
+                          />
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] flex items-center justify-center p-0 border-0"> {/* Adjust max-w as needed */}
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-2"
+                            onClick={(e) => { e.stopPropagation(); goToPrevious(); }} // Prevent closing dialog
+                          >
+                            <ChevronLeft className="h-6 w-6" />
+                          </Button>
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`New ${index + 1}`}
+                            className="max-h-[80vh] max-w-full object-contain" // Ensure image fits
+                            onKeyDown={handleKeyDown}
+                            tabIndex={0} // Make focusable for key events
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-2"
+                            onClick={(e) => { e.stopPropagation(); goToNext(); }} // Prevent closing dialog
+                          >
+                            <ChevronRight className="h-6 w-6" />
+                          </Button>
+                        </DialogContent>
+                      </Dialog>
+                      {/* --- END LIGHTBOX WRAPPER --- */}
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="destructive"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeNewlySelectedPhoto(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Display existing photos with remove option */}
+            {existingPhotos.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium mb-2">Existing Photos (click to remove):</h4>
+                <div className="flex flex-wrap gap-2">
+                  {existingPhotos.map((url, index) => (
+                    <div key={index} className="relative group">
+                      {/* --- LIGHTBOX WRAPPER FOR EXISTING PHOTOS --- */}
+                      <Dialog open={lightboxOpen && lightboxIndex === index} onOpenChange={(open) => {
+                          if (!open) closeLightbox();
+                      }}>
+                        <DialogTrigger asChild>
+                          <img
+                            src={url}
+                            alt={`Existing ${index + 1}`}
+                            className="w-20 h-20 object-cover rounded border cursor-pointer" // Added cursor-pointer
+                            onClick={() => openLightbox(index)} // Open lightbox for this photo
+                          />
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] flex items-center justify-center p-0 border-0"> {/* Adjust max-w as needed */}
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-2"
+                            onClick={(e) => { e.stopPropagation(); goToPrevious(); }} // Prevent closing dialog
+                          >
+                            <ChevronLeft className="h-6 w-6" />
+                          </Button>
+                          <img
+                            src={url}
+                            alt={`Existing ${index + 1}`}
+                            className="max-h-[80vh] max-w-full object-contain" // Ensure image fits
+                            onKeyDown={handleKeyDown}
+                            tabIndex={0} // Make focusable for key events
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-2"
+                            onClick={(e) => { e.stopPropagation(); goToNext(); }} // Prevent closing dialog
+                          >
+                            <ChevronRight className="h-6 w-6" />
+                          </Button>
+                        </DialogContent>
+                      </Dialog>
+                      {/* --- END LIGHTBOX WRAPPER --- */}
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="destructive"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeExistingPhoto(url)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Show photos marked for removal (optional, for confirmation) */}
+            {photosToRemove.length > 0 && (
+              <div className="text-sm text-yellow-600">
+                <p>Photos marked for removal:</p>
+                <ul>
+                  {photosToRemove.map((url, idx) => (
+                    <li key={idx} className="truncate max-w-xs">- {url}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2 pt-4">
@@ -339,6 +615,58 @@ export default function GymManagement({ gym, onGymUpdate }) {
             )}
           </div>
         </div>
+
+        {/* Display existing photos in view mode */}
+        {gym.photos && gym.photos.length > 0 && (
+          <div>
+            <h3 className="font-semibold text-sm text-slate-500 mb-2">Photos</h3>
+            <div className="flex flex-wrap gap-2">
+              {gym.photos.map((url, index) => (
+                <div key={index} className="relative group">
+                  {/* --- LIGHTBOX WRAPPER FOR VIEW MODE PHOTOS --- */}
+                  <Dialog open={lightboxOpen && lightboxIndex === index} onOpenChange={(open) => {
+                      if (!open) closeLightbox();
+                  }}>
+                    <DialogTrigger asChild>
+                      <img
+                        src={url}
+                        alt={`Gym photo ${index + 1}`}
+                        className="w-20 h-20 object-cover rounded border cursor-pointer" // Added cursor-pointer
+                        onClick={() => openLightbox(index)} // Open lightbox for this photo
+                      />
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] flex items-center justify-center p-0 border-0"> {/* Adjust max-w as needed */}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-2"
+                        onClick={(e) => { e.stopPropagation(); goToPrevious(); }} // Prevent closing dialog
+                      >
+                        <ChevronLeft className="h-6 w-6" />
+                      </Button>
+                      <img
+                        src={url}
+                        alt={`Gym photo ${index + 1}`}
+                        className="max-h-[80vh] max-w-full object-contain" // Ensure image fits
+                        onKeyDown={handleKeyDown}
+                        tabIndex={0} // Make focusable for key events
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-2"
+                        onClick={(e) => { e.stopPropagation(); goToNext(); }} // Prevent closing dialog
+                      >
+                        <ChevronRight className="h-6 w-6" />
+                      </Button>
+                    </DialogContent>
+                  </Dialog>
+                  {/* --- END LIGHTBOX WRAPPER --- */}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -49,10 +49,16 @@ function Login() {
   setForm({ email: "", password: "" });
 
   // Redirect based on role
-  const role = user.role || "athlete";
-  // normalize possible values
-  const rolePath = (role === "admin" || role === "coach" || role === "gym" || role === "athlete") ? role : "athlete";
-  navigate(`/dashboard/${rolePath}`);
+  const role = user.role?.toLowerCase() || "athlete";
+  const roleRedirects = {
+    admin: "/admin/home",
+    athlete: "/dashboard/athlete",
+    coach: "/coach/programs",
+    gym: "/dashboard/gym",
+  };
+
+  const targetPath = roleRedirects[role] || "/dashboard/athlete";
+  navigate(targetPath);
     } catch (err) {
       const message = err?.response?.data?.message || "Invalid credentials";
       setServerErrors([message]);

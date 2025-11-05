@@ -1,14 +1,8 @@
-import React from "react";
-import {
-  Profile
-} from "@/pages/Profile"
-//import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-export default function AthleteDashboard() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Athlete Dashboard</h1>
-      <p className="mt-2">Welcome Athlete — track progress, plans, and goals here.</p>
-      <Profile/>
-    </div>
-  );
+export default function Athlete() {
+    return (
+        <div>
+            <h1>Athlete</h1>
+            <p>Dashboard Athlete</p>
+        </div>
+    );
 }
