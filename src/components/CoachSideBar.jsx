@@ -1,107 +1,99 @@
-"use client";
-import React, { useState } from "react";
-import { Sidebar } from "@/components/ui/sidebar";
+import { DollarSign, Settings, Zap, LogOut } from "lucide-react"
 import {
-  IconArrowLeft,
-  IconBrandTabler,
-  IconSettings,
-  IconUserBolt,
-} from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
- import { DollarSign } from "lucide-react";
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  useSidebar,
+  SidebarGroup,
+} from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+ import { Button } from "@/components/ui/button"
+import { Link } from "react-router"
+import { useSelector } from "react-redux"
+import useChanged from "@/hooks/useChanged"
 
-function CoachSideBar({ children }) {
-  const links = [
+function CoachSideBar() {
+  const user = useSelector(state => state.auth.user)
+  
+  const navigationLinks = [
     {
       label: "Programs",
       href: "/coach/programs",
-      icon: (
-        <DollarSign className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      icon: DollarSign,
     },
     {
       label: "Profile",
       href: "#",
-      icon: (
-        <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      icon: Zap,
     },
     {
       label: "Settings",
       href: "#",
-      icon: (
-        <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      icon: Settings,
     },
-  ];
-  const [open, setOpen] = useState(false);
+  ]
 
   return (
-    <div
-      className={cn(
-        " flex w-full  flex-1 flex-col overflow-hidden  border border-neutral-200  md:flex-row dark:border-neutral-700 dark:bg-neutral-800",
-        "h-screen"
-      )}
-    >
-      <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            {open ? <Logo /> : <LogoIcon />}
-            <div className="mt-8 flex flex-col gap-2">
-              {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
-              ))}
+    <Sidebar>
+      <SidebarHeader className="border-b border-sidebar-border p-4">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src="https://avatar.vercel.sh/coach" alt="Coach" />
+            <AvatarFallback>CO</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-sidebar-foreground truncate">Coach Dashboard</p>
+            <p className="text-xs text-sidebar-foreground/60 truncate">Welcome back</p>
+          </div>
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent className="py-4">
+        <SidebarGroup>
+          <SidebarMenu className="gap-2">
+            {navigationLinks.map((link) => (
+              <SidebarMenuItem key={link.label} >
+                <Link
+                  to={link.href}
+                  className="flex items-center gap-3 px-3 py-2 rounded-md text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+                >
+                  <link.icon className="h-5 w-5 flex-shrink-0" />
+                  <span className="text-sm font-medium">{link.label}</span>
+                </Link>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className="border-t border-sidebar-border p-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 px-2">
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={user.avatar} alt="User" />
+              <AvatarFallback>{user.name[0]}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-sidebar-foreground truncate">{user.name}</p>
+              <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
             </div>
           </div>
-          <div>
-            <SidebarLink
-              link={{
-                label: "Manu Arora",
-                href: "#",
-                icon: (
-                  <img
-                    src="https://assets.aceternity.com/manu.png"
-                    className="h-7 w-7 shrink-0 rounded-full"
-                    width={50}
-                    height={50}
-                    alt="Avatar"
-                  />
-                ),
-              }}
-            />
-          </div>
-        </SidebarBody>
-      </Sidebar>
-      {children}
-    </div>
-  );
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start gap-2 text-sidebar-foreground hover:bg-sidebar-accent bg-transparent"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
+      </SidebarFooter>
+    </Sidebar>
+  )
 }
-export const Logo = () => {
-  return (
-    <a
-      href="#"
-      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-    >
-      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="font-medium whitespace-pre text-black dark:text-white"
-      >
-        Acet Labs
-      </motion.span>
-    </a>
-  );
-};
-export const LogoIcon = () => {
-  return (
-    <a
-      href="#"
-      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-    >
-      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
-    </a>
-  );
-};
 
-export default CoachSideBar;
+
+export default CoachSideBar

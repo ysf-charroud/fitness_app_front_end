@@ -48,7 +48,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    console.log("one");
     // Only handle 401 errors for non-refresh requests that haven't been retried
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
