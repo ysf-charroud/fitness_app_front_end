@@ -185,31 +185,10 @@ const Home = () => {
         {/* Hero section doesn't need scroll reveal as it's above the fold */}
         <HeroSection />
 
-        {/* Profile (if logged in) & public comment box */}
-        <section className="py-10">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Leave a Comment</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={submitComment} className="space-y-3">
-                  <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Share your thoughts..." />
-                  <div className="flex justify-end">
-                    <Button type="submit" disabled={!comment.trim()}>Add Comment</Button>
-                  </div>
-                  {commentStatus && (
-                    <p className="text-sm text-green-600">{commentStatus}</p>
-                  )}
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
+{/* 
         <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={0} blurStrength={5}>
           <SearchBar />
-        </ScrollReveal>
+        </ScrollReveal> */}
 
         <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={3} blurStrength={8}>
           <WhyChooseUs />
@@ -293,7 +272,27 @@ const Home = () => {
           </section>
         </ScrollReveal>
 
-        
+        {/* Profile (if logged in) & public comment box */}
+        <section className="py-10">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Leave a Comment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={submitComment} className="space-y-3">
+                  <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Share your thoughts..." />
+                  <div className="flex justify-end">
+                    <Button type="submit" disabled={!comment.trim()}>Add Comment</Button>
+                  </div>
+                  {commentStatus && (
+                    <p className="text-sm text-green-600">{commentStatus}</p>
+                  )}
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
 
         {/* CTA with attention-grabbing animation */}
         <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={4} blurStrength={7}>
