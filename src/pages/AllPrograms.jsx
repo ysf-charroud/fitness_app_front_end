@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import ProgramCard from "@/components/PorgramCard";
+import ProgramCard from "@/components/ProgramCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,7 +31,7 @@ export default function AllPrograms() {
         const { data } = await api.get("/programs", {
           params: { page, limit, goal: goal === "all" ? undefined : goal, q: search, sort },
         });
-        const list = Array.isArray(data) ? data : (data?.programs || data?.data || []);
+        const list = Array.isArray(data) ? data : (data?.records || []);
         if (mounted) {
           setItems(list);
           setTotal(data?.total || data?.count || list.length);

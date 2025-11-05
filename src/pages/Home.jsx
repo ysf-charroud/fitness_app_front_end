@@ -14,7 +14,6 @@ import GymsSection from "../components/GymsSection";
 import CTA from "../components/CTA";
 import ContactForm from "../components/ContactForm";
 import Footer from "../components/Footer";
-import ProgramCard from "../components/PorgramCard";
 // Redux-powered data; API calls handled in slices
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";

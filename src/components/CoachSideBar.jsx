@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Link } from "react-router"
 import { useSelector } from "react-redux"
 import useChanged from "@/hooks/useChanged"
+import { Profile } from "@/pages/Profile"
 
 function CoachSideBar() {
   const user = useSelector(state => state.auth.user)
@@ -26,7 +27,7 @@ function CoachSideBar() {
     },
     {
       label: "Profile",
-      href: "#",
+      href: "/ProfilePage",
       icon: Zap,
     },
     {
@@ -72,23 +73,13 @@ function CoachSideBar() {
       <SidebarFooter className="border-t border-sidebar-border p-4">
         <div className="space-y-3">
           <div className="flex items-center gap-3 px-2">
-            <Avatar className="h-9 w-9">
-              <AvatarImage src={user.avatar} alt="User" />
-              <AvatarFallback>{user.name[0]}</AvatarFallback>
-            </Avatar>
+           <Profile />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-sidebar-foreground truncate">{user.name}</p>
               <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start gap-2 text-sidebar-foreground hover:bg-sidebar-accent bg-transparent"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
+           
         </div>
       </SidebarFooter>
     </Sidebar>

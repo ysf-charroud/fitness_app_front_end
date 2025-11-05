@@ -12,7 +12,7 @@ const ClimbingBoxLoader = lazy(() =>
 const App = () => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.isLoading);
-  const token = useSelector((state) => state.auth.token);
+  // const token = useSelector((state) => state.auth.token);
 
   const [delayPassed, setDelayPassed] = useState(false);
 
@@ -25,10 +25,10 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (token) {
+    // if (token) {
       dispatch(fetchUser());
-    }
-  }, [dispatch, token]);
+    // }
+  }, [dispatch]);
 
   if (loading || !delayPassed) {
     return (

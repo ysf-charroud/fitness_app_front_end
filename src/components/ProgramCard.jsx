@@ -21,8 +21,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import placeHolder from '@/public/images/program-placeholder.png'
 import { toast } from "sonner";
 
+console.log(placeHolder)
 const ProgramCard = ({ program, showUpdateForm, updateProgram, deleteProgram }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -99,11 +101,11 @@ const ProgramCard = ({ program, showUpdateForm, updateProgram, deleteProgram }) 
       <div className="relative w-full h-64 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <img
-          src={program.image || "/program-placeholder.png"}
+          src={program.image || placeHolder}
           alt={program.title || "Program"}
           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-105"
           onError={(e) => {
-            e.target.src = "/program-placeholder.png";
+            e.target.src = placeHolder;
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent dark:from-neutral-900 dark:via-neutral-900/60" />
@@ -230,8 +232,8 @@ const ProgramCard = ({ program, showUpdateForm, updateProgram, deleteProgram }) 
               Purchased by
             </span>
             <span className="text-sm font-semibold">
-              {program.bought_by?.length || 0}{" "}
-              {program.bought_by?.length === 1 ? "person" : "people"}
+              {program?.bought_by?.length || 0}{" "}
+              {program?.bought_by?.length === 1 ? "person" : "people"}
             </span>
           </div>
 
