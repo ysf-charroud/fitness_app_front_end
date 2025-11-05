@@ -26,38 +26,8 @@ import FileUpload from "./FileUpload";
 import GoalTags from "./GoalTags";
 import api from "@/services/axios/axiosClient";
 // Form field configurations
-const FORM_FIELDS = [
-  {
-    name: "title",
-    label: "Program Title",
-    type: "text",
-    placeholder: "enter a value",
-  },
-  {
-    name: "price",
-    label: "Price",
-    type: "number",
-    placeholder: "enter a value",
-  },
-  {
-    name: "goals",
-    label: "Goals",
-    type: "text",
-    placeholder: "enter a value",
-  },
-  {
-    name: "period",
-    label: "Duration (days)",
-    type: "number",
-    placeholder: "enter a value",
-  },
-];
 
-// File upload configurations
 
-// Reusable file upload component
-
-// Goal tag component
 
 export function CreateProgramForm() {
   // Form state
@@ -72,11 +42,37 @@ export function CreateProgramForm() {
       cover: null,
     },
   });
-
+  
   const goals = form.watch("goals");
   const file = form.watch("file");
   const image = form.watch("image");
-
+  
+  const FORM_FIELDS = [
+    {
+      name: "title",
+      label: "Program Title",
+      type: "text",
+      placeholder: "enter a value",
+    },
+    {
+      name: "price",
+      label: "Price",
+      type: "number",
+      placeholder: "enter a value",
+    },
+    {
+      name: "goals",
+      label: "Goals",
+      type: "text",
+      placeholder: "enter a value",
+    },
+    {
+      name: "period",
+      label: "Duration (days)",
+      type: "number",
+      placeholder: "enter a value",
+    },
+  ];
   const FILE_CONFIGS = [
     {
       id: "cover",

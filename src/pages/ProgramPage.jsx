@@ -57,21 +57,6 @@ export default function ProgramPage() {
     }
   };
 
-  const handleToggleActive = async (program, newActiveState) => {
-    try {
-      await api.patch(`/api/programs/${program._id}`, {
-        active: newActiveState,
-      });
-      toast.success(
-        `Program ${newActiveState ? "activated" : "deactivated"} successfully`
-      );
-      await refetch();
-    } catch (error) {
-      console.error("Error toggling active state:", error);
-      toast.error("Failed to update program status");
-    }
-  };
-
   return (
     <div className="w-full px-6 pt-8 h-full overflow-y-auto">
       <SidebarTrigger />
@@ -110,7 +95,6 @@ export default function ProgramPage() {
         loading={loading}
         onUpdate={handleUpdate}
         onDelete={handleDelete}
-        onToggleActive={handleToggleActive}
       />
 
       {/* Pagination */}

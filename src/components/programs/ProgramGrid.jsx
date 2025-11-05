@@ -1,6 +1,6 @@
-import ProgramCard from "@/components/PorgramCard";
+import ProgramCard from "@/components/ProgramCard";
 
-const ProgramGrid = ({ programs, loading, onUpdate, onDelete, onToggleActive }) => {
+const ProgramGrid = ({ programs, loading, onUpdate, onDelete }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -32,7 +32,6 @@ const ProgramGrid = ({ programs, loading, onUpdate, onDelete, onToggleActive }) 
           program={program}
           onUpdate={() => onUpdate(program)}
           onDelete={() => onDelete(program)}
-          onToggleActive={onToggleActive}
         />
       ))}
     </div>

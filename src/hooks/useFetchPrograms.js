@@ -69,7 +69,7 @@ const useFetchPrograms = () => {
       } else {
         fetchPrograms(1, activeFilter, searchQuery);
       }
-    }, 1000);
+    }, 500);
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
