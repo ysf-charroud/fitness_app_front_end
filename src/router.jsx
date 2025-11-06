@@ -36,6 +36,7 @@ import ErrorSection7 from "./pages/ErrorPage";
 import Auth from "./layout/Auth";
 import AllPrograms from "./pages/AllPrograms";
 import AllCoaches from "./pages/AllCoaches";
+import CoachProfile from "./pages/CoachProfile";
 import GymProfile from "./pages/GymProfile";
 
 const router = createBrowserRouter([
@@ -95,6 +96,10 @@ const router = createBrowserRouter([
   {
     path: "/coaches",
     element: <AllCoaches />,
+  },
+  {
+    path: "/coaches/:id",
+    element: <CoachProfile />,
   },
   {
     path: "/gyms/:id",

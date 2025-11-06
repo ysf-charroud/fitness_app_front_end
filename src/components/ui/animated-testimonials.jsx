@@ -46,6 +46,7 @@ export const AnimatedTestimonials = ({
         const { data: resp } = await api.get("/coaches", { params: { page: 1, limit: 6 } });
         const list = Array.isArray(resp) ? resp : (resp?.coaches || resp?.data || []);
         const mapped = list.map((c) => ({
+          id: c._id || c.id,
           name: c.name || c.fullName || "Coach",
           designation: c.specialty || c.expertise || "Fitness",
           quote: c.bio || "Helping you reach your goals.",
@@ -167,7 +168,7 @@ export const AnimatedTestimonials = ({
               </>
             )}
           </motion.div>
-          <div className="flex gap-4 pt-12 md:pt-0">
+          <div className="flex gap-4 pt-12 md:pt-0 items-center">
             <button
               onClick={handlePrev}
               className="h-7 w-7 rounded-full bg-secondary flex items-center justify-center group/button">
@@ -180,6 +181,11 @@ export const AnimatedTestimonials = ({
               <IconArrowRight
                 className="h-5 w-5 text-foreground group-hover/button:-rotate-12 transition-transform duration-300" />
             </button>
+            {data.length > 0 && data[active].id && (
+              <Button asChild>
+                <Link to={`/coaches/${data[active].id}`}>View Profile</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>
