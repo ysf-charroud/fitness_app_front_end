@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export default function GymsList() {
   const dispatch = useDispatch();
@@ -117,6 +119,11 @@ export default function GymsList() {
                       {`$${Number(gym.pricing).toFixed(2)}`}
                     </p>
                   )}
+                  <div className="mt-4 flex justify-end">
+                    <Button asChild>
+                      <Link to={`/gyms/${gym._id || gym.id}`}>Consult</Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}

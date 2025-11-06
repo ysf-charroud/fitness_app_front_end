@@ -98,6 +98,14 @@ export default function AllCoaches() {
                   <p className="text-gray-600 text-sm">
                     {coach.specialty || "Fitness"}
                   </p>
+                  <div className="mt-4">
+                    <a
+                      href={`/coaches/${coach._id || coach.id}`}
+                      className="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      View Profile
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}

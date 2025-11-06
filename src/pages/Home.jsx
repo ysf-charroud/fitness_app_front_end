@@ -14,6 +14,7 @@ import GymsSection from "../components/GymsSection";
 import CTA from "../components/CTA";
 import ContactForm from "../components/ContactForm";
 import Footer from "../components/Footer";
+import ProgramCard from "../components/ProgramCard";
 // Redux-powered data; API calls handled in slices
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -217,7 +218,7 @@ const Home = () => {
               ) : (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {programs.map((program, idx) => (
+                    {programs.slice(0, 6).map((program, idx) => (
                       <ProgramCard key={program._id || idx} program={program} />
                     ))}
                   </div>
@@ -265,6 +266,11 @@ const Home = () => {
                       </div>
                     ))}
                   </div>
+                  <div className="mt-10 flex justify-center">
+                    <Button asChild>
+                      <Link to="/gyms">View More</Link>
+                    </Button>
+                  </div>
                 </>
               )}
             </div>
@@ -293,10 +299,12 @@ const Home = () => {
           </div>
         </section>
 
-        {/* CTA with attention-grabbing animation */}
-        <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={4} blurStrength={7}>
-          <CTA />
-        </ScrollReveal>
+        {/* CTA with attention-grabbing animation (hidden for athletes) */}
+        {!isAthlete && (
+          <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={4} blurStrength={7}>
+            <CTA />
+          </ScrollReveal>
+        )}
 
         {/* Contact form with subtle animation */}
         <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={2} blurStrength={5}>

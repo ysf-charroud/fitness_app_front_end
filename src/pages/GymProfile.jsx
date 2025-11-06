@@ -85,10 +85,10 @@ export default function GymProfile() {
                     {gym.owner && <p><span className="font-semibold">Owner:</span> {String(gym.owner)}</p>}
                     {Array.isArray(gym.coaches) && <p><span className="font-semibold">Coaches:</span> {gym.coaches.length}</p>}
                     {Array.isArray(gym.athletes) && <p><span className="font-semibold">Athletes:</span> {gym.athletes.length}</p>}
-                    {gym.createdAt && <p><span className="font-semibold">Created:</span> {new Date(gym.createdAt).toLocaleString()}</p>}
-                    {gym.updatedAt && <p><span className="font-semibold">Updated:</span> {new Date(gym.updatedAt).toLocaleString()}</p>}
+                    {/* {gym.createdAt && <p><span className="font-semibold">Created:</span> {new Date(gym.createdAt).toLocaleString()}</p>}
+                    {gym.updatedAt && <p><span className="font-semibold">Updated:</span> {new Date(gym.updatedAt).toLocaleString()}</p>} */}
                   </div>
-                </div>
+                </div>  
               </div>
             </div>
           </CardContent>

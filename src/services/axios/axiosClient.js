@@ -32,7 +32,11 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
      // Only handle 401 errors for non-refresh requests that haven't been retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !(originalRequest?.url || "").includes("/auth/refresh")
+    ) {
       originalRequest._retry = true;
       try {
         const response = await api.post("/api/auth/refresh", {}, { withCredentials: true });
