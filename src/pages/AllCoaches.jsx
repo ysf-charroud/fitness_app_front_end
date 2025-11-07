@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/pagination";
 import api from "@/services/api";
 import SearchBar from "@/components/SearchBar";
+import Header from "@/components/Header";
 
 export default function AllCoaches() {
   const [items, setItems] = useState([]);
@@ -54,7 +55,9 @@ export default function AllCoaches() {
   const visible = useMemo(() => items, [items]);
 
   return (
-    <div className="min-h-screen px-6 py-10 max-w-7xl mx-auto">
+    <>
+      <Header />
+      <div className="min-h-screen px-6 py-10 pt-24 max-w-7xl mx-auto">
       <h1 className="text-3xl sm:text-4xl font-bold mb-6">All Coaches</h1>
 
       {/* ✅ Connected SearchBar */}
@@ -136,6 +139,7 @@ export default function AllCoaches() {
           </div>
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 }
