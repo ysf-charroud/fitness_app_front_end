@@ -22,6 +22,9 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
+  DialogTitle, // ✅ Import DialogTitle
+  DialogDescription, // ✅ Import DialogDescription
+  DialogFooter, // ✅ Import DialogFooter
 } from '@/components/ui/dialog';
 // --- END ADDED ---
 // --- ADDED FOR EQUIPMENT MULTISELECT ---
@@ -71,7 +74,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
   const [openEquipmentSelector, setOpenEquipmentSelector] = useState(false); // ✅ State for Popover open state
   const [equipmentSearchTerm, setEquipmentSearchTerm] = useState('');
   const [equipmentFilterType, setEquipmentFilterType] = useState('All'); // Default filter
-  const [customEquipmentModalOpen, setCustomEquipmentModalOpen] = useState(false);
+  const [customEquipmentModalOpen, setCustomEquipmentModalOpen] = useState(false); // State for custom equipment dialog
   const [newCustomEquipment, setNewCustomEquipment] = useState({ title: '', picture: '', details: '', type: '' });
 
   // Get unique types for filter dropdown
@@ -126,7 +129,7 @@ export default function GymManagement({ gym, onGymUpdate }) {
         equipements: [...prev.equipements, customEquipment]
       }));
       setNewCustomEquipment({ title: '', picture: '', details: '', type: '' });
-      setCustomEquipmentModalOpen(false);
+      setCustomEquipmentModalOpen(false); // Close the modal after adding
     } else {
       alert("Please fill in the title and picture for the custom equipment.");
     }
@@ -406,15 +409,85 @@ export default function GymManagement({ gym, onGymUpdate }) {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-medium">Select Equipment:</h4>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setCustomEquipmentModalOpen(true)}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Custom
-                </Button>
+                {/* --- MODAL TRIGGER BUTTON --- */}
+                <Dialog open={customEquipmentModalOpen} onOpenChange={setCustomEquipmentModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Custom
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    {/* --- CORRECTED DIALOG STRUCTURE --- */}
+                    <DialogTitle>Add Custom Equipment</DialogTitle>
+                    <DialogDescription>
+                      Enter the details for the equipment not found in the catalog.
+                    </DialogDescription>
+                    {/* --- END CORRECTED DIALOG STRUCTURE --- */}
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="custom-title">Title *</Label>
+                        <Input
+                          id="custom-title"
+                          value={newCustomEquipment.title}
+                          onChange={(e) => setNewCustomEquipment(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="e.g., Smith Machine Pro"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="custom-picture">Image URL *</Label>
+                        <Input
+                          id="custom-picture"
+                          value={newCustomEquipment.picture}
+                          onChange={(e) => setNewCustomEquipment(prev => ({ ...prev, picture: e.target.value }))}
+                          placeholder="https://example.com/equipment-image.jpg"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="custom-details">Details (optional)</Label>
+                        <Textarea
+                          id="custom-details"
+                          value={newCustomEquipment.details}
+                          onChange={(e) => setNewCustomEquipment(prev => ({ ...prev, details: e.target.value }))}
+                          placeholder="Describe the equipment..."
+                          rows={2}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="custom-type">Type/Category (optional)</Label>
+                        <Input
+                          id="custom-type"
+                          value={newCustomEquipment.type}
+                          onChange={(e) => setNewCustomEquipment(prev => ({ ...prev, type: e.target.value }))}
+                          placeholder="e.g., Strength, Cardio"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setCustomEquipmentModalOpen(false);
+                          setNewCustomEquipment({ title: '', picture: '', details: '', type: '' }); // Reset form on close
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={addCustomEquipment} // Call the function to add the equipment
+                      >
+                        Add Equipment
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                {/* --- END MODAL TRIGGER BUTTON --- */}
               </div>
 
               {/* Multi-Select Popover */}
