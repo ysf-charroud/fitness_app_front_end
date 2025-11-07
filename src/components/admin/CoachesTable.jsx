@@ -1,9 +1,11 @@
 // components/admin/CoachesTable.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Eye, Mail, User, Calendar, FileText, Award, Scale, Activity, AlertTriangle } from "lucide-react";
+import { Eye, Mail, User, Calendar, FileText, Award, Scale, Activity, AlertTriangle, Check, X } from "lucide-react";
+import { approveCoach, rejectCoach } from "@/services/redux/slices/adminSlice";
 import {
   Table,
   TableBody,
@@ -37,16 +39,23 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 
-export default function CoachesTable({ data, onViewDetails }) {
+export default function CoachesTable({ data, onViewDetails, onApprove, onReject }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCoach, setSelectedCoach] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const itemsPerPage = 10;
+  const dispatch = useDispatch();
+  // keep a local copy so we can optimistically update row state immediately
+  const [localData, setLocalData] = useState(data || []);
+
+  useEffect(() => {
+    setLocalData(data || []);
+  }, [data]);
 
   // Filter data
-  const filteredData = data?.filter((coach) => {
+  const filteredData = localData?.filter((coach) => {
     const matchesSearch =
       coach.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       coach.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -79,6 +88,11 @@ export default function CoachesTable({ data, onViewDetails }) {
     onViewDetails?.(coach);
   };
 
+  const applyLocalApprove = (coachId, approved) => {
+    setLocalData((prev) => prev.map((c) => (c._id === coachId ? { ...c, is_Approved: approved } : c)));
+    setSelectedCoach((prev) => (prev && prev._id === coachId ? { ...prev, is_Approved: approved } : prev));
+  };
+
   const getStatusBadge = (isApproved) => {
     return isApproved ? (
       <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
@@ -91,13 +105,13 @@ export default function CoachesTable({ data, onViewDetails }) {
     );
   };
 
-  const getActiveBadge = (isActive) => {
-    return isActive ? (
-      <Badge className="bg-emerald-100 text-emerald-800">Active</Badge>
-    ) : (
-      <Badge variant="outline" className="bg-gray-100 text-gray-800">Inactive</Badge>
-    );
-  };
+  // const getActiveBadge = (isActive) => {
+  //   return isActive ? (
+  //     <Badge className="bg-emerald-100 text-emerald-800">Active</Badge>
+  //   ) : (
+  //     <Badge variant="outline" className="bg-gray-100 text-gray-800">Inactive</Badge>
+  //   );
+  // };
 
   return (
     <div className="w-full space-y-4">
@@ -133,6 +147,7 @@ export default function CoachesTable({ data, onViewDetails }) {
             <TableRow>
               <TableHead>Coach</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>CIN</TableHead>
               <TableHead>Experience</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Details</TableHead>
@@ -159,6 +174,7 @@ export default function CoachesTable({ data, onViewDetails }) {
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">{coach.email}</TableCell>
+                  <TableCell className="text-sm font-mono">{coach.cin || "—"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1 text-sm">
                       <Calendar className="w-3 h-3 text-muted-foreground" />
@@ -168,18 +184,54 @@ export default function CoachesTable({ data, onViewDetails }) {
                   <TableCell>
                     <div className="flex flex-col gap-1">
                       {getStatusBadge(coach.is_Approved)}
-                      {getActiveBadge(coach.isActive)}
+                      {/* {getActiveBadge(coach.isActive)} */}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleViewDetails(coach)}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center gap-2 justify-end">
+                      {/* View Details */}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleViewDetails(coach)}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+
+                      {/* Approve / Reject */}
+                      {!coach.is_Approved ? (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => {
+                            // optimistic UI update
+                            applyLocalApprove(coach._id, true);
+                            if (onApprove) return onApprove(coach._id);
+                            dispatch(approveCoach(coach._id)).catch(() => applyLocalApprove(coach._id, false));
+                          }}
+                          className="text-green-500 hover:text-green-700 hover:bg-green-50"
+                          title="Approve coach"
+                        >
+                          <Check className="w-4 h-4" />
+                        </Button>
+                      ) : (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => {
+                            // optimistic UI update
+                            applyLocalApprove(coach._id, false);
+                            if (onReject) return onReject(coach._id);
+                            dispatch(rejectCoach(coach._id)).catch(() => applyLocalApprove(coach._id, true));
+                          }}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          title="Reject coach"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -250,7 +302,7 @@ export default function CoachesTable({ data, onViewDetails }) {
                   <h3 className="text-xl font-bold">{selectedCoach.name}</h3>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {getStatusBadge(selectedCoach.is_Approved)}
-                    {getActiveBadge(selectedCoach.isActive)}
+                    {/* {getActiveBadge(selectedCoach.isActive)} */}
                     <Badge variant="secondary">
                       {selectedCoach.gender === "male" ? "Male" : "Female"}
                     </Badge>

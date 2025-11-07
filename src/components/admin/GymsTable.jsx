@@ -1,9 +1,10 @@
 // components/admin/GymsTable.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Trash2, Eye, MapPin, Phone, Mail, CheckCircle, XCircle, Globe } from "lucide-react"; // ✅ Ajout CheckCircle & XCircle
+import { Trash2, Eye, MapPin, Phone, Mail, Check, X, Globe ,Euro,Clock , Users,Calendar} from "lucide-react"; // ✅ Mise à jour des icônes
 import {
   Table,
   TableBody,
@@ -36,6 +37,26 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { approveGym, rejectGym } from "@/services/redux/slices/adminSlice";
+
+// const getEquipmentCategories = (equipements) => {
+//   if (!equipements) return [];
+//   const categories = {};
+//   Object.entries(equipements).forEach(([key]) => {
+//     const category = key.split('_')[0];
+//     if (!categories[category]) categories[category] = [];
+//     categories[category].push(key);
+//   });
+//   return Object.entries(categories).map(([category, items]) => ({
+//     category: category.charAt(0).toUpperCase() + category.slice(1),
+//     items
+//   }));
+// };
+
+const getEquipmentName = (equipment) => {
+  return equipment.split('_').slice(1).join(' ').toLowerCase()
+    .replace(/\b\w/g, l => l.toUpperCase());
+};
 
 export default function GymsTable({ 
   data, 
@@ -44,15 +65,21 @@ export default function GymsTable({
   onDelete,
   onViewDetails,
 }) {
+  const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGym, setSelectedGym] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const itemsPerPage = 10;
+  const [localData, setLocalData] = useState(data || []);
+
+  useEffect(() => {
+    setLocalData(data || []);
+  }, [data]);
 
   // Filter data
-  const filteredData = data?.filter(gym => {
+  const filteredData = localData?.filter(gym => {
     const matchesSearch =
       gym.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       gym.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -79,6 +106,11 @@ export default function GymsTable({
     setSelectedGym(gym);
     setIsDialogOpen(true);
     onViewDetails?.(gym);
+  };
+
+  const applyLocalApprove = (gymId, approved) => {
+    setLocalData(prev => prev.map(g => g._id === gymId ? { ...g, isApproved: approved } : g));
+    setSelectedGym(prev => (prev && prev._id === gymId ? { ...prev, isApproved: approved } : prev));
   };
 
   const getStatusBadge = (isApproved) => {
@@ -159,18 +191,26 @@ export default function GymsTable({
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1 text-sm">
-                      {gym.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-3 h-3" />
-                          {gym.phone}
-                        </div>
-                      )}
-                      {gym.email && (
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-3 h-3" />
-                          <span className="text-xs">{gym.email}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-3 h-3" />
+                        <span>{gym.contact?.phone || gym.phone || '___________'}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Globe className="w-3 h-3 text-muted-foreground" />
+                        {(() => {
+                          const websiteValue = gym.contact?.website || gym.website;
+                          if (websiteValue) {
+                            const href = websiteValue.startsWith('http') ? websiteValue : `https://${websiteValue}`;
+                            return (
+                              <a href={href} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">
+                                {websiteValue}
+                              </a>
+                            );
+                          }
+                          return <span className="text-xs">___________</span>;
+                        })()}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -194,21 +234,31 @@ export default function GymsTable({
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => onApprove(gym._id)}
+                          onClick={() => {
+                            // optimistic update
+                            applyLocalApprove(gym._id, true);
+                            if (onApprove) return onApprove(gym._id);
+                            dispatch(approveGym(gym._id)).catch(() => applyLocalApprove(gym._id, false));
+                          }}
                           className="text-green-500 hover:text-green-700 hover:bg-green-50"
                           title="Approve gym"
                         >
-                          <CheckCircle className="w-4 h-4" />
+                          <Check className="w-4 h-4" />
                         </Button>
                       ) : (
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => onReject(gym._id)}
+                          onClick={() => {
+                            // optimistic update
+                            applyLocalApprove(gym._id, false);
+                            if (onReject) return onReject(gym._id);
+                            dispatch(rejectGym(gym._id)).catch(() => applyLocalApprove(gym._id, true));
+                          }}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           title="Reject gym"
                         >
-                          <XCircle className="w-4 h-4" />
+                          <X className="w-4 h-4" />
                         </Button>
                       )}
 
@@ -271,146 +321,199 @@ export default function GymsTable({
       )}
 
       {/* Gym Details Dialog */}
-     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogContent className="max-w-5xl p-0 overflow-hidden">
-        <div className="grid md:grid-cols-2 gap-0">
-          {/* Left Side - Image */}
-          <div className="relative bg-muted flex items-center justify-center min-h-[500px]">
-            {selectedGym?.imageUrl ? (
-              <img
-                src={selectedGym.imageUrl}
-                alt={selectedGym.name || 'Gym'}
-                className="w-full h-full object-cover"
-              />
-            ) : (
+      {/* Gym Details Dialog */}
+<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+  <DialogContent className="max-w-6xl max-h-[90vh] p-0 overflow-hidden">
+    <div className="grid grid-cols-1 lg:grid-cols-2 h-full max-h-[90vh]">
+      {/* Photo Gallery */}
+      <div className="bg-muted relative flex flex-col">
+        {/* Main Image */}
+        <div className="flex-1 overflow-hidden">
+          {selectedGym?.photos && selectedGym.photos.length > 0 ? (
+            <img
+              src={selectedGym.photos[0]}
+              alt={selectedGym.name || 'Gym'}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
               <Avatar className="h-48 w-48 rounded-lg">
-                <AvatarFallback className="text-6xl rounded-lg">
+                <AvatarFallback className="text-6xl bg-gray-200 rounded-lg">
                   {selectedGym?.name?.charAt(0) || 'G'}
                 </AvatarFallback>
               </Avatar>
-            )}
-            <div className="absolute top-4 left-4">
-              {getStatusBadge(selectedGym?.isApproved)}
             </div>
+          )}
+        </div>
+
+        {/* Thumbnails (if multiple photos) */}
+        {selectedGym?.photos?.length > 1 && (
+          <div className="flex gap-2 p-3 bg-white border-t overflow-x-auto">
+            {selectedGym.photos.map((photo, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  const updated = [...selectedGym.photos];
+                  updated[0] = photo;
+                  updated[idx] = selectedGym.photos[0];
+                  setSelectedGym({ ...selectedGym, photos: updated });
+                }}
+                className="flex-shrink-0 w-16 h-16 rounded border overflow-hidden"
+              >
+                <img src={photo} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Status badge */}
+        <div className="absolute top-4 left-4">
+          {getStatusBadge(selectedGym?.isApproved)}
+        </div>
+      </div>
+
+      {/* Info Panel */}
+      <div className="p-6 overflow-y-auto bg-white">
+        <div className="space-y-6">
+          {/* Header */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">{selectedGym?.name}</h2>
+            <p className="text-sm text-gray-600 flex items-center gap-1.5 mt-1">
+              <MapPin className="w-4 h-4" />
+              {selectedGym?.location || selectedGym?.address || 'No location'}
+            </p>
           </div>
 
-          {/* Right Side - Information */}
-          <div className="p-8 overflow-y-auto max-h-[600px]">
-            <div className="space-y-6">
-              {/* Header */}
-              <div>
-                <h2 className="text-2xl font-bold mb-2">{selectedGym?.name}</h2>
-                <p className="text-sm text-muted-foreground">
-                  Complete information about this gym
-                </p>
-              </div>
+          {/* Contact */}
+          <section>
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Contact</h3>
+            <div className="space-y-2 text-sm">
+              {selectedGym?.contact?.phone && (
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                  <span>{selectedGym.contact.phone}</span>
+                </div>
+              )}
+              {selectedGym?.contact?.website && (
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-muted-foreground" />
+                  <a
+                    href={selectedGym.contact.website.startsWith('http') ? selectedGym.contact.website : `https://${selectedGym.contact.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    {selectedGym.contact.website}
+                  </a>
+                </div>
+              )}
+            </div>
+          </section>
 
-              <Separator />
-
-              {/* Location Information */}
-              {(selectedGym?.location || selectedGym?.address || selectedGym?.city || selectedGym?.country) && (
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                    Location
-                  </h3>
-                  <div className="space-y-2">
-                    {(selectedGym.location || selectedGym.address) && (
-                      <div className="flex items-start gap-3">
-                        <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
-                        <span className="text-sm">
-                          {selectedGym.location || selectedGym.address}
-                        </span>
-                      </div>
-                    )}
-                    {selectedGym.city && (
-                      <div className="text-sm text-muted-foreground">
-                        City: <span className="text-foreground">{selectedGym.city}</span>
-                      </div>
-                    )}
-                    {selectedGym.country && (
-                      <div className="text-sm text-muted-foreground">
-                        Country: <span className="text-foreground">{selectedGym.country}</span>
-                      </div>
-                    )}
+          {/* Details */}
+          <section>
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              {selectedGym?.schedule && (
+                <div className="flex items-start gap-2">
+                  <Clock className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="text-xs text-gray-500">Schedule</span>
+                    <p>{selectedGym.schedule}</p>
                   </div>
                 </div>
               )}
-
-              {/* Contact Information */}
-              {(selectedGym?.phone || selectedGym?.email || selectedGym?.website) && (
-                <>
-                  <Separator />
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                      Contact
-                    </h3>
-                    <div className="space-y-2">
-                      {selectedGym.phone && (
-                        <div className="flex items-center gap-3">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{selectedGym.phone}</span>
-                        </div>
-                      )}
-                      {selectedGym.email && (
-                        <div className="flex items-center gap-3">
-                          <Mail className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{selectedGym.email}</span>
-                        </div>
-                      )}
-                      {selectedGym.website && (
-                        <div className="flex items-center gap-3">
-                          <Globe  cn=" h-4 text-muted-foreground" />
-                          <a 
-                            href={selectedGym.website} 
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-primary hover:underline"
-                          >
-                            {selectedGym.website}
-                          </a>
-                        </div>
-                      )}
-                    </div>
+              {selectedGym?.pricing !== undefined && (
+                <div className="flex items-start gap-2">
+                  <Euro className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="text-xs text-gray-500">Pricing</span>
+                    <p>{selectedGym.pricing} TND/month</p>
                   </div>
-                </>
+                </div>
               )}
-
-              {/* Description */}
-              {selectedGym?.description && (
-                <>
-                  <Separator />
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                      Description
-                    </h3>
-                    <p className="text-sm leading-relaxed">{selectedGym.description}</p>
+              <div className="flex items-start gap-2">
+                <Users className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                <div>
+                  <span className="text-xs text-gray-500">Mixity</span>
+                  <p>{selectedGym?.mix ? 'Mixed' : 'Women Only'}</p>
+                </div>
+              </div>
+              {selectedGym?.createdAt && (
+                <div className="flex items-start gap-2">
+                  <Calendar className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="text-xs text-gray-500">Created</span>
+                    <p>{new Date(selectedGym.createdAt).toLocaleDateString()}</p>
                   </div>
-                </>
-              )}
-
-              {/* Facilities */}
-              {selectedGym?.facilities && selectedGym.facilities.length > 0 && (
-                <>
-                  <Separator />
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                      Facilities
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedGym.facilities.map((facility, index) => (
-                        <Badge key={index} variant="secondary" className="px-3 py-1">
-                          {facility}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </>
+                </div>
               )}
             </div>
-          </div>
+          </section>
+
+          {/* Activities */}
+          {selectedGym?.activities?.length > 0 && (
+            <section>
+              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Activities</h3>
+              <div className="flex flex-wrap gap-2">
+                {selectedGym.activities.map((activity, i) => (
+                  <Badge key={i} variant="secondary" className="px-2.5 py-1 text-xs">
+                    {activity}
+                  </Badge>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Equipment */}
+         {/* Equipment - Compact Version */}
+{selectedGym?.equipements && (
+  <section>
+    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Equipment</h3>
+    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+      {Object.keys(selectedGym.equipements)
+        .filter(key => selectedGym.equipements[key]) // ne garde que les équipements à true
+        .map((key, idx) => (
+          <Badge key={idx} variant="outline" className="px-2 py-0.5 text-xs whitespace-nowrap">
+            {getEquipmentName(key)}
+          </Badge>
+        ))}
+    </div>
+  </section>
+)}
+          {/* Stats */}
+          {(selectedGym?.coaches?.length > 0 || selectedGym?.athletes?.length > 0) && (
+            <section>
+              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Statistics</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {selectedGym.coaches && (
+                  <div className="text-center py-2 bg-muted rounded">
+                    <div className="text-xl font-bold">{selectedGym.coaches.length}</div>
+                    <div className="text-xs text-muted-foreground">Coaches</div>
+                  </div>
+                )}
+                {selectedGym.athletes && (
+                  <div className="text-center py-2 bg-muted rounded">
+                    <div className="text-xl font-bold">{selectedGym.athletes.length}</div>
+                    <div className="text-xs text-muted-foreground">Athletes</div>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* Description */}
+          {selectedGym?.description && (
+            <section>
+              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Description</h3>
+              <p className="text-sm text-gray-700 whitespace-pre-line">{selectedGym.description}</p>
+            </section>
+          )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }

@@ -128,7 +128,7 @@ const chartConfig = {
   mobile: { label: "Mobile", color: "var(--primary)" }
 };
 
-export function ChartAreaInteractive({className}) {
+export function ChartAreaInteractive({className}) { 
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState("90d");
 
@@ -155,7 +155,7 @@ export function ChartAreaInteractive({className}) {
       <CardHeader>
         <CardTitle>Total Visitors</CardTitle>
         <CardDescription>
-          <span className="hidden @[540px]/card:block">Total for the last 3 months</span>
+          
           <span className="@[540px]/card:hidden">Last 3 months</span>
         </CardDescription>
         <CardAction>
@@ -188,9 +188,9 @@ export function ChartAreaInteractive({className}) {
         </CardAction>
       </CardHeader>
 
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6 h-full flex flex-col">
-        <div className="w-full h-full">
-        <ChartContainer config={chartConfig} className="w-full h-full">
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6 flex flex-col">
+        <div className="w-full">
+        <ChartContainer config={chartConfig} className="w-full" style={{ height: 220 }}>
           <AreaChart data={filteredData}>
             <defs>
               <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">

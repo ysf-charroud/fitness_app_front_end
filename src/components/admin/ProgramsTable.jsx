@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Eye, CheckCircle, XCircle } from "lucide-react"; // On garde seulement les icônes nécessaires
+import { Eye, Check, X } from "lucide-react"; // On garde seulement les icônes nécessaires
 import {
   Table,
   TableBody,
@@ -184,7 +184,7 @@ export default function ProgramsTable({
                             className="text-green-500 hover:text-green-700 hover:bg-green-50"
                             title="Approve program"
                           >
-                            <CheckCircle className="w-4 h-4" />
+                            <Check className="w-4 h-4" />
                           </Button>
                           <Button
                             size="icon"
@@ -193,7 +193,7 @@ export default function ProgramsTable({
                             className="text-red-500 hover:text-red-700 hover:bg-red-50"
                             title="Reject program"
                           >
-                            <XCircle className="w-4 h-4" />
+                            <X className="w-4 h-4" />
                           </Button>
                         </>
                       ) : program.status === "approved" ? (
@@ -204,7 +204,7 @@ export default function ProgramsTable({
                           className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           title="Reject program"
                         >
-                          <XCircle className="w-4 h-4" />
+                          <X className="w-4 h-4" />
                         </Button>
                       ) : null}
                       {/* Si rejected → rien de plus que View */}

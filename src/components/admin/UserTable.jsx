@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Trash2, CheckCircle, XCircle } from "lucide-react"; // ✅ Ajout des icônes
+import { Trash2, Check, X } from "lucide-react"; // ✅ Ajout des icônes
 import {
   Table,
   TableBody,
@@ -137,7 +137,7 @@ export default function UserTable({ data, onActivate, onDeactivate, onDelete }) 
                           className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           title="Deactivate user"
                         >
-                          <XCircle className="w-4 h-4" />
+                          <X className="w-4 h-4" />
                         </Button>
                       ) : (
                         <Button
@@ -147,7 +147,7 @@ export default function UserTable({ data, onActivate, onDeactivate, onDelete }) 
                           className="text-green-500 hover:text-green-700 hover:bg-green-50"
                           title="Activate user"
                         >
-                          <CheckCircle className="w-4 h-4" />
+                          <Check className="w-4 h-4" />
                         </Button>
                       )}
 

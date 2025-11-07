@@ -28,7 +28,7 @@ export default function DashboardCharts() {
   const { revenueChart, roleDistribution } = useSelector(
     (state) => state.admin
   );
-  const [timeRange, setTimeRange] = useState("90d");
+  const [timeRange, setTimeRange] = useState("90d")
 
   const filteredRevenueData = revenueChart.filter((item) => {
     const date = new Date(item.date);

@@ -3,32 +3,62 @@ import { useCallback, useEffect, useState } from "react";
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import api from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export const AnimatedTestimonials = ({
   testimonials,
   autoplay = false,
-  className
+  className,
+  fetchCoaches = false,
 }) => {
   const [active, setActive] = useState(0);
+  const [coaches, setCoaches] = useState([]);
+  const data = fetchCoaches ? coaches : (testimonials || []);
 
   const handleNext = useCallback(() => {
-    setActive((prev) => (prev + 1) % testimonials.length);
-  }, [testimonials.length]);
+    if (!data.length) return;
+    setActive((prev) => (prev + 1) % data.length);
+  }, [data.length]);
 
   const handlePrev = useCallback(() => {
-    setActive((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  }, [testimonials.length]);
+    if (!data.length) return;
+    setActive((prev) => (prev - 1 + data.length) % data.length);
+  }, [data.length]);
 
   const isActive = useCallback((index) => {
     return index === active;
   }, [active]);
 
   useEffect(() => {
-    if (autoplay) {
+    if (autoplay && data.length > 0) {
       const interval = setInterval(handleNext, 5000);
       return () => clearInterval(interval);
     }
-  }, [autoplay, handleNext]);
+  }, [autoplay, handleNext, data.length]);
+
+  useEffect(() => {
+    if (!fetchCoaches) return;
+    let mounted = true;
+    const load = async () => {
+      try {
+        const { data: resp } = await api.get("/coaches", { params: { page: 1, limit: 6 } });
+        const list = Array.isArray(resp) ? resp : (resp?.coaches || resp?.data || []);
+        const mapped = list.map((c) => ({
+          name: c.name || c.fullName || "Coach",
+          designation: c.specialty || c.expertise || "Fitness",
+          quote: c.bio || "Helping you reach your goals.",
+          src: c.image || c.avatar || "https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=400",
+        }));
+        if (mounted) setCoaches(mapped);
+      } catch (e) {
+        if (mounted) setCoaches([]);
+      }
+    };
+    load();
+    return () => { mounted = false };
+  }, [fetchCoaches]);
 
   const randomRotateY = () => {
     return Math.floor(Math.random() * 21) - 10;
@@ -43,7 +73,7 @@ export const AnimatedTestimonials = ({
         <div>
           <div className="relative h-80 w-full">
             <AnimatePresence>
-              {testimonials.map((testimonial, index) => (
+              {data.map((testimonial, index) => (
                 <motion.div
                   key={testimonial.src}
                   initial={{
@@ -59,7 +89,7 @@ export const AnimatedTestimonials = ({
                     rotate: isActive(index) ? 0 : randomRotateY(),
                     zIndex: isActive(index)
                       ? 999
-                      : testimonials.length + 2 - index,
+                      : data.length + 2 - index,
                     y: isActive(index) ? [0, -80, 0] : 0,
                   }}
                   exit={{
@@ -102,14 +132,16 @@ export const AnimatedTestimonials = ({
               duration: 0.2,
               ease: "easeInOut",
             }}>
-            <h3 className="text-2xl font-bold text-foreground">
-              {testimonials[active].name}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              {testimonials[active].designation}
-            </p>
-            <motion.p className="text-lg text-muted-foreground mt-8">
-              {testimonials[active].quote.split(" ").map((word, index) => (
+            {data.length > 0 && (
+              <>
+              <h3 className="text-2xl font-bold text-foreground">
+                {data[active].name}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {data[active].designation}
+              </p>
+              <motion.p className="text-lg text-muted-foreground mt-8">
+              {data[active].quote.split(" ").map((word, index) => (
                 <motion.span
                   key={index}
                   initial={{
@@ -132,6 +164,8 @@ export const AnimatedTestimonials = ({
                 </motion.span>
               ))}
             </motion.p>
+              </>
+            )}
           </motion.div>
           <div className="flex gap-4 pt-12 md:pt-0">
             <button
@@ -148,6 +182,11 @@ export const AnimatedTestimonials = ({
             </button>
           </div>
         </div>
+      </div>
+      <div className="mt-10 flex justify-center">
+        <Button asChild>
+          <Link to="/coaches">View More</Link>
+        </Button>
       </div>
     </div>
   );

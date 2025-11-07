@@ -4,7 +4,6 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDashboardStats,
-  fetchRevenueChart,
   fetchRoleDistribution,
   fetchLastTransactions,
   fetchBestPrograms,
@@ -21,7 +20,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     dispatch(fetchDashboardStats());
-    dispatch(fetchRevenueChart());
     dispatch(fetchRoleDistribution());
     dispatch(fetchLastTransactions());
     dispatch(fetchBestPrograms());

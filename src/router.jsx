@@ -17,16 +17,25 @@ import LoginSuccess from "./pages/LoginSuccess";
 import ForgotPassword from "./pages/Forgotpassword";
 import ResetPassword from "./pages/Resetpassword";
 // Dashboards
-//import AdminDashboard from "./pages/dashboard/Admin";
+//import AdminDashboard from "./page/dashboard/Admin";
 import ProfilePage from "./pages/ProfilePage";
-import CoachDashboard from "./pages/dashboard/Coach";
+import Athlete from "./pages/dashboard/Athlete";
+//import CoachDashboard from "./page/dashboard/Coach";
 import GymDashboard from "./pages/dashboard/GymDashboard/Dashboard";
-import AthleteDashboard from "./pages/dashboard/Athlete";
+
+//import AthleteDashboard from "./page/dashboard/Athlete";
+ 
+//import CreateProgramPage from "./page/CreateProgramPage";
+//import AdminDashboard from "./pages/dashboard/Admin";
+//import CoachDashboard from "./pages/dashboard/Coach";
+//import AthleteDashboard from "./pages/dashboard/Athlete";
 
 //import CreateProgramPage from "./pages/CreateProgramPage";
 //import MainLayout from "./layout/MainLayout";
 import ErrorSection7 from "./pages/ErrorPage";
 import Auth from "./layout/Auth";
+import AllPrograms from "./pages/AllPrograms";
+import AllCoaches from "./pages/AllCoaches";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +63,10 @@ const router = createBrowserRouter([
     element: <ForgotPassword />,
   },+
   {
+    path: "/dashboard/athlete",
+    element: <Athlete />,
+  },
+  {
     path: "/reset-password/:token",
     element: <ResetPassword />,
   },
@@ -70,9 +83,17 @@ const router = createBrowserRouter([
     element: <LoginSuccess />,
   },
   {
-    path: "/dashboard/coach",
-    element: <CoachDashboard />,
+    path: "/programs",
+    element: <AllPrograms />,
   },
+  {
+    path: "/coaches",
+    element: <AllCoaches />,
+  },
+  {
+    path: "/dashboard/coach",
+    element: <ProgramPage />,
+  }, 
   {
     path: "/dashboard/gym",
     element: <GymDashboard />,
@@ -85,10 +106,11 @@ const router = createBrowserRouter([
     path: "/error",
     element: <ErrorSection7 />,
   },
-  {
+ /*{
     path: "/dashboard/athlete",
     element: <AthleteDashboard />,
-  },
+  }, 
+  */
   {
     path: "/reset-password",
     element: <ResetPassword />,
@@ -113,7 +135,7 @@ const router = createBrowserRouter([
       },
     ],
   },
-  { path: "*", element: <div className="bg-red-500 h-screen">404 not found</div> },
+  { path: "*", element: <ErrorSection7/> },
 ]);
 
 export default router;

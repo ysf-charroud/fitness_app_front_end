@@ -46,7 +46,8 @@ export default function DashboardStats() {
         />
       </Link>
 
-      <Link to="/admin/statistics" className="block">
+      <Link to="/admin/transactions
+      " className="block">
         <StatCard
           title="Revenues"
           value={`${stats?.totalRevenue || 0} MAD`}

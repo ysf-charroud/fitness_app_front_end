@@ -1,6 +1,6 @@
-// services/redux/adminSlice.js
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
 
 // USERS
  const fetchUsers = createAsyncThunk(
@@ -116,6 +116,29 @@ import api from "../../api";
   }
 );
 
+const approveCoach = createAsyncThunk(
+  "admin/approveCoach",
+  async (coachId, { rejectWithValue }) => {
+    try {
+      const { data } = await api.put(`/coaches/${coachId}/approve`);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+const rejectCoach = createAsyncThunk(
+  "admin/rejectCoach",
+  async (coachId, { rejectWithValue }) => {
+    try {
+      const { data } = await api.put(`/coaches/${coachId}/reject`);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
 // STATS
  const fetchStats = createAsyncThunk(
   "admin/fetchStats",
@@ -136,7 +159,7 @@ import api from "../../api";
   "admin/approveGym",
   async (gymId, { rejectWithValue }) => {
     try {
-      const { data } = await api.put(`/gyms/${gymId}/approve`);
+      const { data } = await api.put(`admin/gyms/${gymId}/approve`);
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -148,7 +171,7 @@ import api from "../../api";
   "admin/rejectGym",
   async (gymId, { rejectWithValue }) => {
     try {
-      const { data } = await api.put(`/gyms/${gymId}/reject`);
+      const { data } = await api.put(`admin/gyms/${gymId}/reject`);
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -180,17 +203,7 @@ import api from "../../api";
   }
 );
 
- const fetchRevenueChart = createAsyncThunk(
-  "admin/fetchRevenueChart",
-  async (_, { rejectWithValue }) => {
-    try {
-      const { data } = await api.get("/admin/revenue-chart");
-      return data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
+
 
  const fetchRoleDistribution = createAsyncThunk(
   "admin/fetchRoleDistribution",
@@ -227,12 +240,16 @@ import api from "../../api";
     }
   }
 );
- const fetchRevenueStats = createAsyncThunk(
-  "admin/fetchRevenueStats",
+
+
+const fetchTransactionStats = createAsyncThunk(
+  "admin/fetchTransactionStats",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await api.get("/admin/revenue-stats");
-      return data;
+      const { data } = await api.get("/admin/transactions");
+      console.log(data);
+      
+      return data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -252,7 +269,14 @@ const adminSlice = createSlice({
     roleDistribution: [],  
     lastTransactions: [],    
     bestPrograms: [],
-    loading:false,   
+    recentTransactions: [],
+    transactionStats: {
+      totalRevenue: 0,
+      dailyRevenue: 0,
+      transactionCount: 0,
+      monthlyGrowth: 0
+    },
+    loading: false,   
     error: null,
   },
   reducers: {},
@@ -339,6 +363,12 @@ const adminSlice = createSlice({
   .addCase(rejectGym.fulfilled, (s, a) => {
     s.gyms = s.gyms.map(gym => gym._id === a.payload._id ? a.payload : gym);
   })
+  .addCase(approveCoach.fulfilled, (s, a) => {
+    s.coaches = s.coaches.map(coach => coach._id === a.payload._id ? a.payload : coach);
+  })
+  .addCase(rejectCoach.fulfilled, (s, a) => {
+    s.coaches = s.coaches.map(coach => coach._id === a.payload._id ? a.payload : coach);
+  })
   .addCase(deleteGym.fulfilled, (s, a) => {
     s.gyms = s.gyms.filter((g) => g._id !== a.payload);
   })
@@ -347,9 +377,9 @@ const adminSlice = createSlice({
 .addCase(fetchDashboardStats.fulfilled, (s,a) => {
   s.stats =a.payload;
 })
-.addCase(fetchRevenueChart.fulfilled, (s,a) => {
-  s.revenueChart =a.payload;
-})
+// .addCase(fetchRevenueChart.fulfilled, (s,a) => {
+//   s.revenueChart =a.payload;
+// })
 
 .addCase(fetchRoleDistribution.fulfilled, (s,a) => {
   s.roleDistribution =a.payload;
@@ -360,14 +390,34 @@ const adminSlice = createSlice({
 .addCase(fetchBestPrograms.fulfilled, (s,a) => {
   s.bestPrograms =a.payload;
 })
-.addCase(fetchRevenueStats.fulfilled, (s, a) => {
-  s.revenueStats = a.payload;
+// .addCase(fetchRevenueStats.fulfilled, (s, a) => {
+//   s.revenueStats = a.payload;
+// })
+.addCase(fetchTransactionStats.pending, (s) => {
+  s.loading = true;
+  s.error = null;
 })
-    
-  },
-});
+.addCase(fetchTransactionStats.fulfilled, (s, a) => {
+  s.loading = false;
+  console.log("dd",a.payload);
+  
+  // s.revenueChart = a.payload.revenueChart;
+  // s.recentTransactions = a.payload.recentTransactions;
+  // s.transactionStats = a.payload.stats;
+  s.error = null;
+})
+.addCase(fetchTransactionStats.rejected, (s, a) => {
+  s.loading = false;
+  s.error = a.payload;
+})
+  }
+})
 
-export default adminSlice.reducer;
+    
+
+
+
+export default adminSlice.reducer; 
 export {
   fetchUsers,
   activateUser,
@@ -381,11 +431,13 @@ export {
   fetchStats,
   approveGym,
   rejectGym,
+  approveCoach,
+  rejectCoach,
   deleteGym,
   fetchDashboardStats,
-  fetchRevenueChart,
+
   fetchRoleDistribution,
   fetchLastTransactions,
   fetchBestPrograms,
-  fetchRevenueStats,
+  fetchTransactionStats,
 };
