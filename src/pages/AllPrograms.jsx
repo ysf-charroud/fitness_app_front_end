@@ -13,6 +13,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import api from "@/services/api";
+import Header from "@/components/Header";
 
 export default function AllPrograms() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -109,7 +110,9 @@ export default function AllPrograms() {
   }, [items, page]);
 
   return (
-    <div className="min-h-screen px-6 py-10 max-w-7xl mx-auto">
+    <>
+      <Header />
+      <div className="min-h-screen px-6 py-10 pt-24 max-w-7xl mx-auto">
       <h1 className="text-3xl sm:text-4xl font-bold mb-6">All Programs</h1>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -197,7 +200,8 @@ export default function AllPrograms() {
           </div>
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

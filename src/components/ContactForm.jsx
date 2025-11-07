@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import emailjs from "emailjs-com";
 import { toast } from "sonner"; // or "react-hot-toast"
-const ContactForm = () => {
+
+const ContactForm = ({ minimalist = false }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -49,19 +50,8 @@ const handleSubmit = (e) => {
     );
 };
 
-  return (
-    <section id="contact" className="bg-white py-16 md:py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Get in Touch with Fitness Journey
-          </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Have questions or feedback? We'd love to hear from you. Fill out the form below or reach out directly.
-          </p>
-        </div>
-        <div className="grid md:grid-cols-2 gap-12">
-          <form onSubmit={handleSubmit} className="space-y-6">
+  const formBody = (
+    <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Your Name
@@ -137,7 +127,26 @@ const handleSubmit = (e) => {
         >
           {loading ? "Sending..." : "Send Message"}
         </button>
-          </form>
+    </form>
+  );
+
+  if (minimalist) {
+    return formBody;
+  }
+
+  return (
+    <section id="contact" className="bg-white py-16 md:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            Get in Touch with Fitness Journey
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Have questions or feedback? We'd love to hear from you. Fill out the form below or reach out directly.
+          </p>
+        </div>
+        <div className="grid md:grid-cols-2 gap-12">
+          {formBody}
 
           <div className="space-y-8">
             <div className="bg-purple-50 rounded-2xl p-6">

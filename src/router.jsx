@@ -5,7 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import UsersList from "./pages/UsersList";
 import ProgramsList from "./pages/ProgramsList";
 import CoachesList from "./pages/CoachesList";
-import GymsList from "./pages/GymsList";
+import Gyms from "./pages/AllGyms";
 import Transactions from "./pages/Statistics"
 import CoachLayout from "./layout/CoachLayout";
 import ProgramPage from "./pages/ProgramPage";
@@ -50,10 +50,10 @@ const router = createBrowserRouter([
     children: [
       {index: true, element: <Dashboard/>},
       {path: "home", element: <Dashboard/>},
-      { path: "athletes", element: <UsersList /> },
+     { path: "athletes", element: <UsersList /> },
       { path: "programs", element: <ProgramsList /> },
       { path: "coaches", element: <CoachesList /> },
-      { path: "gyms", element: <GymsList /> },
+      //{ path: "gyms", element: <GymsList /> },
       { path: "transactions", element: <Transactions /> },
     ],
   },{
@@ -70,7 +70,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/gyms",
-    element: <GymsList />,
+    element: <Gyms />,
   },
 
   {
