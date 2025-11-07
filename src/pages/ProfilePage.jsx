@@ -13,7 +13,35 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Activity,
+  AlertCircle,
+  Camera,
+  CheckCircle2,
+  Dumbbell,
+  IdCard,
+  Instagram,
+  Linkedin,
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  Trophy,
+  UploadCloud,
+  User as UserIcon,
+} from "lucide-react";
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -131,7 +159,6 @@ function ProfilePage() {
   };
 
   const allergiesString = useMemo(() => (form.allergies || []).join(", "), [form.allergies]);
-  const boughtProgramsString = useMemo(() => (form.bought_programs || []).join(", "), [form.bought_programs]);
 
   // Handle selecting an avatar image from local files
   const handleFileChange = (e) => {
@@ -321,235 +348,464 @@ function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gray-50">
-      <div className="w-full max-w-md">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle>Account Profile</CardTitle>
-            <CardDescription>Manage your account details</CardDescription>
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-100 px-4 py-10">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:flex-row">
+        <Card className="sticky top-24 h-fit flex-1 border-transparent bg-white/80 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-white/60">
+          <CardHeader className="space-y-4">
+            <div className="relative mx-auto h-36 w-36 overflow-hidden rounded-full border border-dashed border-primary/30">
+              <Avatar className="h-full w-full">
+                <AvatarImage
+                  src={form.avatar}
+                  alt="Avatar preview"
+                  onError={() => setForm((p) => ({ ...p, avatar: "" }))}
+                />
+                <AvatarFallback className="bg-primary/10 text-2xl font-semibold text-primary">
+                  {form.name?.charAt(0) || "U"}
+                </AvatarFallback>
+              </Avatar>
+              <label className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-1 bg-black/60 opacity-0 transition-opacity hover:opacity-100">
+                <Camera className="h-5 w-5 text-white" />
+                <span className="text-xs font-medium text-white">Change Photo</span>
+                <input type="file" accept="image/*" onChange={handleFileChange} className="sr-only" />
+              </label>
+            </div>
+            <div className="text-center">
+              <div className="mb-2 flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-wide text-primary/70">
+                <ShieldCheck className="h-4 w-4" />
+                <span>{(userFromRedux?.role || "Athlete").toUpperCase()}</span>
+              </div>
+              <CardTitle className="text-3xl font-semibold text-slate-900">{form.name || "Your Name"}</CardTitle>
+              <CardDescription className="flex items-center justify-center gap-2 text-sm text-slate-500">
+                <Mail className="h-4 w-4" />
+                {form.email}
+              </CardDescription>
+            </div>
           </CardHeader>
-
-          <CardContent>
-            {error && (
-              <div className="mb-4">
-                <Alert variant="destructive">
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
+          <CardContent className="space-y-6">
+            <Separator className="bg-slate-200" />
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm text-slate-500">
+                <span>Status</span>
+                <Badge variant={userFromRedux?.isActive ? "outline" : "destructive"} className="gap-1">
+                  {userFromRedux?.isActive ? (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Active
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="h-3.5 w-3.5" /> Inactive
+                    </>
+                  )}
+                </Badge>
               </div>
-            )}
-
-            {message && (
-              <div className="mb-4">
-                <Alert variant="success">
-                  <AlertTitle>Success</AlertTitle>
-                  <AlertDescription>{message}</AlertDescription>
-                </Alert>
-              </div>
-            )}
-
-            <form onSubmit={handleSave} className="flex flex-col gap-6">
-              <div className="flex items-center gap-4">
-                <Avatar>
-                    <AvatarImage
-                      src={form.avatar}
-                      alt="Avatar preview"
-                      onError={() => setForm((p) => ({ ...p, avatar: "" }))}
-                    />
-                </Avatar>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-muted-foreground">Name</label>
-                  <Input name="name" value={form.name} onChange={handleChange} />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground">Email</label>
-                <Input name="email" value={form.email} readOnly />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground">Password (plain text)</label>
-                <Input name="password" value={form.password} onChange={handleChange} placeholder="Enter new password" />
-                <p className="text-xs text-muted-foreground mt-1">This will replace your password. It is sent to the server for hashing.</p>
-              </div>
-
-
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground">Upload avatar image</label>
-                <Input type="file" accept="image/*" onChange={handleFileChange} />
-                <p className="text-xs text-muted-foreground mt-1">PNG/JPG/GIF/WebP, up to 2MB.</p>
-              </div>
-
-              {role === "athlete" && (
-                <div className="space-y-4">
-                  <h4 className="font-semibold">Fitness Info</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-muted-foreground">Height (cm)</label>
-                      <Input name="height" value={form.height} onChange={handleChange} type="number" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-muted-foreground">Weight (kg)</label>
-                      <Input name="weight" value={form.weight} onChange={handleChange} type="number" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-muted-foreground">Fitness Level</label>
-                      <Input name="fitness_level" value={form.fitness_level} onChange={handleChange} placeholder="beginner | intermediate | advanced" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-muted-foreground">Activity Frequency</label>
-                      <Input name="activity_frequency" value={form.activity_frequency} onChange={handleChange} placeholder="active | moderate | sedentary" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground">Goals</label>
-                    <Input name="goals" value={form.goals} onChange={handleChange} placeholder="weight_loss | muscle_gain | endurance | general" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground">Allergies (comma separated)</label>
-                    <Input value={allergiesString} onChange={(e) => setForm((p) => ({ ...p, allergies: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) }))} />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground">Bought Programs (IDs, comma separated)</label>
-                    <Input value={boughtProgramsString} onChange={(e) => setForm((p) => ({ ...p, bought_programs: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) }))} />
-                  </div>
-                  <div className="space-y-3">
-                    <h5 className="font-medium">Profile</h5>
-                    <div>
-                      <label className="block text-sm font-medium text-muted-foreground">Bio</label>
-                      <Input value={form.profile?.bio || ""} onChange={(e) => handleNestedChange("profile.bio", e.target.value)} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-sm font-medium text-muted-foreground">Phone</label>
-                        <Input value={form.profile?.phone || ""} onChange={(e) => handleNestedChange("profile.phone", e.target.value)} />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-muted-foreground">Address</label>
-                        <Input value={form.profile?.address || ""} onChange={(e) => handleNestedChange("profile.address", e.target.value)} />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-sm font-medium text-muted-foreground">Instagram</label>
-                        <Input value={form.profile?.social_links?.instagram || ""} onChange={(e) => handleNestedChange("profile.social_links.instagram", e.target.value)} />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-muted-foreground">LinkedIn</label>
-                        <Input value={form.profile?.social_links?.linkedin || ""} onChange={(e) => handleNestedChange("profile.social_links.linkedin", e.target.value)} />
-                      </div>
-                    </div>
-                  </div>
+              {form.profile?.bio && (
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                  <p className="mb-1 flex items-center gap-2 font-semibold text-slate-700">
+                    <UserIcon className="h-4 w-4" /> Bio
+                  </p>
+                  <p className="leading-relaxed">{form.profile.bio}</p>
                 </div>
               )}
-
-              {role === "coach" && (
-                <div className="space-y-4">
-                  <h4 className="font-semibold">Coach Info</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-muted-foreground">CIN</label>
-                      <Input name="cin" value={form.cin} onChange={handleChange} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-muted-foreground">Years of Experience</label>
-                      <Input name="years_of_experience" value={form.years_of_experience} onChange={handleChange} type="number" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground">Speciality</label>
-                    <Input name="speciality" value={form.speciality} onChange={handleChange} />
-                  </div>
-                  <div className="space-y-3">
-                    <h5 className="font-medium">Certificates</h5>
-                    {(form.certificates || []).map((c, idx) => (
-                      <div key={idx} className="space-y-2">
-                        <div className="grid grid-cols-3 gap-3">
-                          <Input placeholder="Title" value={c.title || ""} onChange={(e) => {
-                          const next = [...(form.certificates || [])];
-                          next[idx] = { ...next[idx], title: e.target.value };
-                          setForm((p) => ({ ...p, certificates: next }));
-                        }} />
-                          <Input placeholder="Institution" value={c.institution || ""} onChange={(e) => {
-                          const next = [...(form.certificates || [])];
-                          next[idx] = { ...next[idx], institution: e.target.value };
-                          setForm((p) => ({ ...p, certificates: next }));
-                        }} />
-                          <Input placeholder="Date Obtained" value={c.date_obtained || ""} onChange={(e) => {
-                          const next = [...(form.certificates || [])];
-                          next[idx] = { ...next[idx], date_obtained: e.target.value };
-                          setForm((p) => ({ ...p, certificates: next }));
-                        }} />
-                        </div>
-                        <div className="grid grid-cols-3 gap-3 items-center">
-                          <Input type="file" accept="image/png,image/jpeg,application/pdf" onChange={(e) => handleCertificateFileChange(idx, e)} />
-                          <div className="col-span-2 text-xs text-muted-foreground truncate">
-                            {c.fileName ? (
-                              <span>Attached: {c.fileName}</span>
-                            ) : (
-                              <span>No file attached</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="flex gap-2">
-                      <Button type="button" variant="outline" onClick={() => setForm((p) => ({ ...p, certificates: [ ...(p.certificates || []), { title: "", institution: "", date_obtained: "" } ] }))}>Add Certificate</Button>
-                      {(form.certificates || []).length > 0 && (
-                        <Button type="button" variant="destructive" onClick={() => setForm((p) => ({ ...p, certificates: (p.certificates || []).slice(0, -1) }))}>Remove Last</Button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <h5 className="font-medium">Profile</h5>
-                    <div>
-                      <label className="block text-sm font-medium text-muted-foreground">Bio</label>
-                      <Input value={form.profile?.bio || ""} onChange={(e) => handleNestedChange("profile.bio", e.target.value)} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-sm font-medium text-muted-foreground">Phone</label>
-                        <Input value={form.profile?.phone || ""} onChange={(e) => handleNestedChange("profile.phone", e.target.value)} />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-muted-foreground">Address</label>
-                        <Input value={form.profile?.address || ""} onChange={(e) => handleNestedChange("profile.address", e.target.value)} />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-sm font-medium text-muted-foreground">Instagram</label>
-                        <Input value={form.profile?.social_links?.instagram || ""} onChange={(e) => handleNestedChange("profile.social_links.instagram", e.target.value)} />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-muted-foreground">LinkedIn</label>
-                        <Input value={form.profile?.social_links?.linkedin || ""} onChange={(e) => handleNestedChange("profile.social_links.linkedin", e.target.value)} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-3 mt-2">
-                <Button type="submit" disabled={saving}>
-                  {saving ? "Saving..." : "Save changes"}
-                </Button>
-                <Button variant="outline" type="button" onClick={() => window.location.reload()}>
-                  Reload
-                </Button>
-                <div className="ml-auto">
-                  <Button variant="destructive" type="button" onClick={handleDelete}>
-                    Delete Account
-                  </Button>
-                </div>
+            </div>
+            <Separator className="bg-slate-200" />
+            <div className="space-y-3">
+              <p className="flex items-center gap-2 text-sm text-slate-500">
+                <Phone className="h-4 w-4" />
+                {form.profile?.phone || "No phone added"}
+              </p>
+              <p className="flex items-center gap-2 text-sm text-slate-500">
+                <MapPin className="h-4 w-4" />
+                {form.profile?.address || "No address set"}
+              </p>
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                {form.profile?.social_links?.instagram && (
+                  <a
+                    href={form.profile.social_links.instagram}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 px-3 py-1 text-white shadow-sm transition hover:scale-105"
+                  >
+                    <Instagram className="h-4 w-4" /> Instagram
+                  </a>
+                )}
+                {form.profile?.social_links?.linkedin && (
+                  <a
+                    href={form.profile.social_links.linkedin}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1 text-white shadow-sm transition hover:scale-105"
+                  >
+                    <Linkedin className="h-4 w-4" /> LinkedIn
+                  </a>
+                )}
               </div>
-            </form>
+            </div>
+            <Separator className="bg-slate-200" />
+            <div className="space-y-3 text-sm text-slate-500">
+              <p className="flex items-center gap-2 font-medium text-slate-600">
+                <UploadCloud className="h-4 w-4" /> Quick Actions
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <Button type="button" variant="outline" onClick={() => window.location.reload()} className="justify-start gap-2">
+                  <Activity className="h-4 w-4" /> Refresh
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  className="justify-start gap-2"
+                >
+                  <AlertCircle className="h-4 w-4" /> Delete Account
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
+
+        <div className="flex-[2] space-y-5">
+          <Card className="border-transparent bg-white/90 shadow-lg backdrop-blur">
+            <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <CardTitle className="text-2xl font-semibold text-slate-900">Profile Settings</CardTitle>
+                <CardDescription className="text-sm text-slate-500">
+                  Organize your profile the way top platforms do.
+                </CardDescription>
+              </div>
+              {error && (
+                <div className="rounded-md border border-destructive/10 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  <AlertCircle className="mr-2 inline h-4 w-4" />
+                  {error}
+                </div>
+              )}
+              {message && (
+                <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-600 shadow-sm">
+                  <CheckCircle2 className="mr-2 inline h-4 w-4" />
+                  {message}
+                </div>
+              )}
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="personal" className="space-y-6">
+                <TabsList className="mx-auto flex flex-wrap justify-center gap-2 sm:justify-start">
+                  <TabsTrigger value="personal" className="gap-2">
+                    <UserIcon className="h-4 w-4" /> Personal Info
+                  </TabsTrigger>
+                  <TabsTrigger value="profile" className="gap-2">
+                    <IdCard className="h-4 w-4" /> Profile
+                  </TabsTrigger>
+                  {role === "athlete" && (
+                    <TabsTrigger value="fitness" className="gap-2">
+                      <Dumbbell className="h-4 w-4" /> Fitness
+                    </TabsTrigger>
+                  )}
+                  {role === "coach" && (
+                    <TabsTrigger value="coach" className="gap-2">
+                      <Trophy className="h-4 w-4" /> Coach
+                    </TabsTrigger>
+                  )}
+                </TabsList>
+
+                <form onSubmit={handleSave} className="space-y-10">
+                  <TabsContent value="personal" className="space-y-6">
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Full Name</Label>
+                        <Input id="name" name="name" value={form.name} onChange={handleChange} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" name="email" value={form.email} readOnly className="cursor-not-allowed bg-slate-100" />
+                      </div>
+                    </div>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                          id="password"
+                          name="password"
+                          type="password"
+                          value={form.password}
+                          onChange={handleChange}
+                          placeholder="Enter new password"
+                        />
+                        <p className="text-xs text-slate-500">Changes will overwrite your current password.</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="avatar">Avatar URL</Label>
+                        <Input
+                          id="avatar"
+                          name="avatar"
+                          value={form.avatar}
+                          onChange={handleChange}
+                          placeholder="https://..."
+                        />
+                        <p className="text-xs text-slate-500">Supports HTTPS or data URIs.</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="profile" className="space-y-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="bio">Bio</Label>
+                      <Textarea
+                        id="bio"
+                        value={form.profile?.bio || ""}
+                        onChange={(e) => handleNestedChange("profile.bio", e.target.value)}
+                        placeholder="Share your story..."
+                        className="min-h-[120px]"
+                      />
+                    </div>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input
+                          id="phone"
+                          value={form.profile?.phone || ""}
+                          onChange={(e) => handleNestedChange("profile.phone", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="address">Address</Label>
+                        <Input
+                          id="address"
+                          value={form.profile?.address || ""}
+                          onChange={(e) => handleNestedChange("profile.address", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="instagram">Instagram</Label>
+                        <Input
+                          id="instagram"
+                          value={form.profile?.social_links?.instagram || ""}
+                          onChange={(e) => handleNestedChange("profile.social_links.instagram", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="linkedin">LinkedIn</Label>
+                        <Input
+                          id="linkedin"
+                          value={form.profile?.social_links?.linkedin || ""}
+                          onChange={(e) => handleNestedChange("profile.social_links.linkedin", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  {role === "athlete" && (
+                    <TabsContent value="fitness" className="space-y-6">
+                      <div className="grid gap-6 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="height">Height (cm)</Label>
+                          <Input id="height" name="height" value={form.height} onChange={handleChange} type="number" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="weight">Weight (kg)</Label>
+                          <Input id="weight" name="weight" value={form.weight} onChange={handleChange} type="number" />
+                        </div>
+                      </div>
+                      <div className="grid gap-6 sm:grid-cols-3">
+                        <div className="space-y-2">
+                          <Label>Fitness Level</Label>
+                          <Select value={form.fitness_level || ""} onValueChange={(value) => setForm((p) => ({ ...p, fitness_level: value }))}>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Select level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="beginner">Beginner</SelectItem>
+                              <SelectItem value="intermediate">Intermediate</SelectItem>
+                              <SelectItem value="advanced">Advanced</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Activity Frequency</Label>
+                          <Select
+                            value={form.activity_frequency || ""}
+                            onValueChange={(value) => setForm((p) => ({ ...p, activity_frequency: value }))}
+                          >
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="How often?" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="sedentary">Sedentary</SelectItem>
+                              <SelectItem value="moderate">Moderate</SelectItem>
+                              <SelectItem value="active">Active</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Goals</Label>
+                          <Select value={form.goals || ""} onValueChange={(value) => setForm((p) => ({ ...p, goals: value }))}>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Select goal" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="weight_loss">Weight Loss</SelectItem>
+                              <SelectItem value="muscle_gain">Muscle Gain</SelectItem>
+                              <SelectItem value="endurance">Endurance</SelectItem>
+                              <SelectItem value="general">General Fitness</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Allergies</Label>
+                        <Input
+                          value={allergiesString}
+                          onChange={(e) =>
+                            setForm((p) => ({
+                              ...p,
+                              allergies: e.target.value
+                                .split(",")
+                                .map((s) => s.trim())
+                                .filter(Boolean),
+                            }))
+                          }
+                          placeholder="Peanuts, lactose..."
+                        />
+                      </div>
+                    </TabsContent>
+                  )}
+
+                  {role === "coach" && (
+                    <TabsContent value="coach" className="space-y-6">
+                      <div className="grid gap-6 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="cin">CIN</Label>
+                          <Input id="cin" name="cin" value={form.cin} onChange={handleChange} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="experience">Years of Experience</Label>
+                          <Input
+                            id="experience"
+                            name="years_of_experience"
+                            value={form.years_of_experience}
+                            onChange={handleChange}
+                            type="number"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="speciality">Speciality</Label>
+                        <Input id="speciality" name="speciality" value={form.speciality} onChange={handleChange} />
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Label>Certificates</Label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setForm((p) => ({
+                                ...p,
+                                certificates: [
+                                  ...(p.certificates || []),
+                                  { title: "", institution: "", date_obtained: "" },
+                                ],
+                              }))
+                            }
+                            className="gap-2"
+                          >
+                            <UploadCloud className="h-4 w-4" /> Add Certificate
+                          </Button>
+                        </div>
+                        <div className="space-y-4">
+                          {(form.certificates || []).map((c, idx) => (
+                            <Card key={idx} className="bg-slate-50/80 shadow-sm">
+                              <CardContent className="space-y-4 p-4">
+                                <div className="grid gap-4 sm:grid-cols-3">
+                                  <Input
+                                    placeholder="Title"
+                                    value={c.title || ""}
+                                    onChange={(e) => {
+                                      const next = [...(form.certificates || [])];
+                                      next[idx] = { ...next[idx], title: e.target.value };
+                                      setForm((p) => ({ ...p, certificates: next }));
+                                    }}
+                                  />
+                                  <Input
+                                    placeholder="Institution"
+                                    value={c.institution || ""}
+                                    onChange={(e) => {
+                                      const next = [...(form.certificates || [])];
+                                      next[idx] = { ...next[idx], institution: e.target.value };
+                                      setForm((p) => ({ ...p, certificates: next }));
+                                    }}
+                                  />
+                                  <Input
+                                    placeholder="Date Obtained"
+                                    value={c.date_obtained || ""}
+                                    onChange={(e) => {
+                                      const next = [...(form.certificates || [])];
+                                      next[idx] = { ...next[idx], date_obtained: e.target.value };
+                                      setForm((p) => ({ ...p, certificates: next }));
+                                    }}
+                                  />
+                                </div>
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                  <Label className="text-sm text-slate-500">Upload proof (PDF/JPG/PNG)</Label>
+                                  <div className="flex flex-1 items-center gap-3">
+                                    <Input
+                                      type="file"
+                                      accept="image/png,image/jpeg,application/pdf"
+                                      onChange={(e) => handleCertificateFileChange(idx, e)}
+                                    />
+                                    <span className="text-xs text-slate-400">
+                                      {c.fileName ? `Attached: ${c.fileName}` : "No file attached"}
+                                    </span>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                          {(form.certificates || []).length > 0 && (
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() =>
+                                setForm((p) => ({
+                                  ...p,
+                                  certificates: (p.certificates || []).slice(0, -1),
+                                }))
+                              }
+                              className="w-fit"
+                            >
+                              Remove Last
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </TabsContent>
+                  )}
+
+                  <Separator className="bg-slate-200" />
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-xs text-slate-500">
+                      Need to leave? You can always re-activate your account by contacting support.
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => window.location.reload()}
+                        className="border-slate-200 text-slate-600 hover:bg-slate-100"
+                      >
+                        Reload
+                      </Button>
+                      <Button type="submit" disabled={saving} className="gap-2">
+                        <CheckCircle2 className="h-4 w-4" /> {saving ? "Saving..." : "Save changes"}
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
