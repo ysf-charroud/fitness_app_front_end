@@ -32,16 +32,22 @@ const writeString = (key, value) => {
 
 export const fetchUser = createAsyncThunk(
   "auth/fetchUser",
-  async (_, thunkAPI) => {
+  async (_,{dispatch,thunkAPI}) => {
     try {
       const response = await api.get("/api/auth/me", { withCredentials: true });
       const userData = response.data;
       writeJSON("auth_user", userData);
+       if (userData.token) {
+        writeString("auth_token", userData.token);
+        dispatch(setToken(userData.token)); // Mets à jour le state Redux
+      }
+
+
+
       return userData;
     } catch (error) {
       const status = error?.response?.status;
-      const message =
-        error?.response?.data?.message || error?.message || "Failed to fetch user data";
+      const message =error?.response?.data?.message || error?.message || "Failed to fetch user data";
       return thunkAPI.rejectWithValue({ status, message });
     }
   }

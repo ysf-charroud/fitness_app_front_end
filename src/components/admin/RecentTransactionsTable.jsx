@@ -1,5 +1,5 @@
 // components/UsersTable.jsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Eye } from "lucide-react";
 import {
   Table,
@@ -35,12 +35,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import api from "@/services/api";
 
-export default function UsersTable() {
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function UsersTable({ data }) {
   const [programFilter, setProgramFilter] = useState("all");
   const [creatorFilter, setCreatorFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,22 +44,10 @@ export default function UsersTable() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const itemsPerPage = 10;
 
-  // Fetch data
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const response = await api.get("/admin/transactions");
-        setTransactions(Array.isArray(response.data) ? response.data : []);
-      } catch (err) {
-        setError("Failed to load transactions");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTransactions();
-  }, []);
+  // Utiliser les données passées en props
+  const transactions = Array.isArray(data) ? data : [];
+  const loading = !data;
+  const error = null;
 
   // Filter logic
   const filteredTransactions = transactions.filter((tx) => {

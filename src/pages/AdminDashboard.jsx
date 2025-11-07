@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDashboardStats,
+  fetchRevenueChart,
   fetchRoleDistribution,
   fetchLastTransactions,
   fetchBestPrograms,
@@ -16,18 +17,14 @@ import DashboardContent from "../components/admin/dashboard/DashboardContent";
 
 export default function Dashboard() {
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.admin);
 
   useEffect(() => {
     dispatch(fetchDashboardStats());
+    dispatch(fetchRevenueChart(30)); // Charger les 30 derniers jours par défaut
     dispatch(fetchRoleDistribution());
     dispatch(fetchLastTransactions());
     dispatch(fetchBestPrograms());
   }, [dispatch]);
-
-  if (loading) {
-    return <div className="p-6">Loading dashboard...</div>;
-  }
 
   return (
     <div className="space-y-6 p-6">

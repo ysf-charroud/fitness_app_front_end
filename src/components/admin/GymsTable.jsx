@@ -321,7 +321,6 @@ export default function GymsTable({
       )}
 
       {/* Gym Details Dialog */}
-      {/* Gym Details Dialog */}
 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
   <DialogContent className="max-w-6xl max-h-[90vh] p-0 overflow-hidden">
     <div className="grid grid-cols-1 lg:grid-cols-2 h-full max-h-[90vh]">

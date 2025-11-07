@@ -1,4 +1,5 @@
 import CoachSideBar from "@/components/CoachSideBar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router";
 
@@ -8,11 +9,12 @@ const CoachLayout = () => {
   if (user.role == "athlete") return <Navigate to="/login" replace />;
   if (user.role == "coach")
     return (
-      <main className="bg-background min-h-screen">
-        <CoachSideBar>
+      <SidebarProvider>
+        <CoachSideBar />
+        <main className="h-screen flex-1">
           <Outlet />
-        </CoachSideBar>
-      </main>
+        </main>
+      </SidebarProvider>
     );
 };
 

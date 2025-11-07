@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { Link } from 'react-router-dom';
 const CTA = () => {
   return (
     <section className="bg-gradient-to-r from-primary to-purple-700 py-16 md:py-20">
@@ -11,11 +11,12 @@ const CTA = () => {
           Join thousands of satisfied users who are achieving their goals with Fitness Journey. Sign up today!
         </p>
         <button className="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-xl">
-          Start Your Journey Now
+          <Link to="/register">
+            Start Your Journey Now
+          </Link>
         </button>
       </div>
     </section>
   );
 };
-
 export default CTA;

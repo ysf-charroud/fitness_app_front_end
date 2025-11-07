@@ -1,6 +1,7 @@
+import { toast } from "sonner";
 import DeleteButton from "./DeleteButtons";
 
-const FileUpload = ({ config, file, onFileSelect, onFileDelete, preview }) => {
+const FileUpload = ({ config }) => {
   const Icon = config.icon;
 
   return (
@@ -16,9 +17,9 @@ const FileUpload = ({ config, file, onFileSelect, onFileDelete, preview }) => {
           if (!files?.length) return;
           const droppedFile = files[0];
           if (config.allowedTypes.includes(droppedFile.type)) {
-            onFileSelect(droppedFile);
+            config.onFileSelect(droppedFile);
           } else {
-            console.error("Invalid file type");
+            toast.error("Invalid file type");
           }
         }}
       >
@@ -31,21 +32,18 @@ const FileUpload = ({ config, file, onFileSelect, onFileDelete, preview }) => {
           }}
           onChange={(e) => {
             const files = e.target.files;
-            if (!files?.length) {
-              onFileDelete();
-              return;
-            }
+            if (!files?.length) return;
             const selectedFile = files[0];
             if (config.allowedTypes.includes(selectedFile.type)) {
-              onFileSelect(selectedFile);
+              config.onFileSelect(selectedFile);
             } else {
-              e.target.value = "";
-              console.error("Invalid file type");
+              toast.error("Invalid file type");
+              e.target.files = null;
             }
           }}
           className="hidden"
         />
-        {!file ? (
+        {!config.file ? (
           <label
             htmlFor={config.id}
             className="flex flex-col items-center gap-2 cursor-pointer p-4"
@@ -68,11 +66,11 @@ const FileUpload = ({ config, file, onFileSelect, onFileDelete, preview }) => {
           </label>
         ) : (
           <div className="relative group">
-            {preview(file)}
+            {config.preview()}
             <DeleteButton
               onDelete={(e) => {
                 e.stopPropagation();
-                onFileDelete();
+                config.onFileDelete();
                 const fileInput = document.getElementById(config.id);
                 if (fileInput) fileInput.value = "";
               }}

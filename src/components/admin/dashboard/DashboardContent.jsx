@@ -1,11 +1,17 @@
 // components/admin/dashboard/DashboardContent.jsx
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { User, ArrowRight } from "lucide-react";
+
 export default function DashboardContent() {
   const { lastTransactions, bestPrograms } = useSelector((state) => state.admin);
+  
+  // Limiter à 3 transactions seulement
+  const displayedTransactions = lastTransactions?.slice(0, 3) || [];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -25,20 +31,45 @@ export default function DashboardContent() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {lastTransactions?.map((t, i) => (
-                <TableRow key={i}>
-                  <TableCell>{t.athlete}</TableCell>
-                  <TableCell>{t.program}</TableCell>
-                  <TableCell>{t.price} MAD</TableCell>
-                  <TableCell>{new Date(t.date).toLocaleDateString()}</TableCell>
-                </TableRow>
-              )) || (
+              {displayedTransactions.length > 0 ? (
+                displayedTransactions.map((t, i) => (
+                  <TableRow 
+                    key={t._id || i}
+                    className="h-16 transition-all duration-300 ease-in-out hover:bg-orange-50 hover:shadow-md hover:scale-[1.02] cursor-pointer border-b"
+                  >
+                    <TableCell className="font-medium py-4">{t.athlete}</TableCell>
+                    <TableCell className="py-4">{t.program}</TableCell>
+                    <TableCell className="font-semibold py-4 text-orange-600">{t.price} MAD</TableCell>
+                    <TableCell className="text-muted-foreground py-4">
+                      {new Date(t.date).toLocaleDateString('fr-FR', { 
+                        day: 'numeric', 
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">No transactions</TableCell>
+                  <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    Aucune transaction disponible
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
+          
+          {/* Bouton Voir Plus */}
+          {displayedTransactions.length > 0 && (
+            <div className="mt-4 flex justify-center">
+              <Link to="/admin/transactions">
+                <Button variant="outline" className="gap-2">
+                  Voir plus
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          )}
         </CardContent>
       </Card>
 

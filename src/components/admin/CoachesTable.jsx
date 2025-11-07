@@ -84,7 +84,7 @@ export default function CoachesTable({ data, onViewDetails, onApprove, onReject 
 
   const handleViewDetails = (coach) => {
     setSelectedCoach(coach);
-    setIsDialogOpen(true);
+    setIsDialogOpen(true)
     onViewDetails?.(coach);
   };
 

@@ -29,10 +29,10 @@ export default function CoachesList() {
   return (
     <div className="w-full space-y-4 p-6">
       <h2 className="text-xl font-semibold">Coaches List</h2>
+      
       <CoachesTable
         data={coaches}
         onViewDetails={handleViewDetails}
-
       />
     </div>
   );

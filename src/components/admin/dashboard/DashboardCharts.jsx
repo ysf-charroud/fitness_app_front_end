@@ -1,7 +1,8 @@
 // components/admin/dashboard/DashboardCharts.jsx
 "use client";
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchRevenueChart } from "@/services/redux/slices/adminSlice";
 import { ChartAreaInteractive } from "@/components/admin/dashboard/chart-area-interactive";
 import UserRolesPieChart from "@/components/admin/dashboard/UserRolesPieChart";
 
@@ -25,28 +26,48 @@ import {
 } from "@/components/ui/select";
 
 export default function DashboardCharts() {
+  const dispatch = useDispatch();
   const { revenueChart, roleDistribution } = useSelector(
     (state) => state.admin
   );
-  const [timeRange, setTimeRange] = useState("90d")
+  const [timeRange, setTimeRange] = useState("30d");
 
-  const filteredRevenueData = revenueChart.filter((item) => {
-    const date = new Date(item.date);
-    const now = new Date();
-    let daysToSubtract = 90;
-    if (timeRange === "30d") daysToSubtract = 30;
-    else if (timeRange === "7d") daysToSubtract = 7;
+  // Recharger les données quand on change la période
+  useEffect(() => {
+    let days = 30;
+    if (timeRange === "90d") days = 90;
+    else if (timeRange === "7d") days = 7;
+    
+    dispatch(fetchRevenueChart(days));
+  }, [timeRange, dispatch]);
 
-    const startDate = new Date(now);
-    startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate;
+  // Pas besoin de filtrer, le backend envoie déjà les bonnes données
+  const filteredRevenueData = revenueChart || [];
+
+  // Vérifier s'il y a des revenues
+  const hasRevenue = filteredRevenueData.some(item => item.revenue > 0);
+  const totalRevenue = filteredRevenueData.reduce((sum, item) => sum + (item.revenue || 0), 0);
+
+  console.log("📊 Chart Data:", {
+    dataPoints: filteredRevenueData.length,
+    hasRevenue,
+    totalRevenue,
+    sample: filteredRevenueData.slice(0, 3)
   });
+
+  // Titre dynamique
+  const getChartTitle = () => {
+    if (timeRange === "7d") return "Revenue (Last 7 Days)";
+    if (timeRange === "30d") return "Revenue (Last 30 Days)";
+    if (timeRange === "90d") return "Revenue (Last 3 Months)";
+    return "Revenue";
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Revenue (Last 30 Days)</CardTitle>
+            <CardTitle>{getChartTitle()}</CardTitle>
             <Select value={timeRange} onValueChange={setTimeRange}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Last 3 months" />

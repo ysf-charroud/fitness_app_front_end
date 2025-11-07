@@ -5,6 +5,7 @@ import Dashboard from "./pages/AdminDashboard";
 import UsersList from "./pages/UsersList";
 import ProgramsList from "./pages/ProgramsList";
 import CoachesList from "./pages/CoachesList";
+import Gyms from "./pages/Gyms";
 import GymsList from "./pages/GymsList";
 import Transactions from "./pages/Statistics"
 import CoachLayout from "./layout/CoachLayout";
@@ -36,6 +37,8 @@ import ErrorSection7 from "./pages/ErrorPage";
 import Auth from "./layout/Auth";
 import AllPrograms from "./pages/AllPrograms";
 import AllCoaches from "./pages/AllCoaches";
+import CoachProfile from "./pages/CoachProfile";
+import GymProfile from "./pages/GymProfile";
 
 const router = createBrowserRouter([
   {
@@ -67,6 +70,11 @@ const router = createBrowserRouter([
     element: <Athlete />,
   },
   {
+    path: "/gyms",
+    element: <Gyms />,
+  },
+
+  {
     path: "/reset-password/:token",
     element: <ResetPassword />,
   },
@@ -89,6 +97,14 @@ const router = createBrowserRouter([
   {
     path: "/coaches",
     element: <AllCoaches />,
+  },
+  {
+    path: "/coaches/:id",
+    element: <CoachProfile />,
+  },
+  {
+    path: "/gyms/:id",
+    element: <GymProfile />,
   },
   {
     path: "/dashboard/coach",

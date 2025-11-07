@@ -79,6 +79,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
     }
   }
 );
+ 
+
  const deleteProgram = createAsyncThunk(
   "admin/deleteProgram",
   async (id, { rejectWithValue }) => {
@@ -97,7 +99,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
   async (_, { rejectWithValue }) => {
     try {
       const { data } = await api.get("/coaches");
-      return data;
+      // Le backend retourne {coaches: [...], total, page, limit}
+      return data.coaches || data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -159,8 +162,8 @@ const rejectCoach = createAsyncThunk(
   "admin/approveGym",
   async (gymId, { rejectWithValue }) => {
     try {
-      const { data } = await api.put(`admin/gyms/${gymId}/approve`);
-      return data;
+      const { data } = await api.put(`/gyms/${gymId}/approve`);
+      return data.gym || data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -171,8 +174,8 @@ const rejectCoach = createAsyncThunk(
   "admin/rejectGym",
   async (gymId, { rejectWithValue }) => {
     try {
-      const { data } = await api.put(`admin/gyms/${gymId}/reject`);
-      return data;
+      const { data } = await api.put(`/gyms/${gymId}/reject`);
+      return data.gym || data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -241,15 +244,28 @@ const rejectCoach = createAsyncThunk(
   }
 );
 
+const fetchRevenueChart = createAsyncThunk(
+  "admin/fetchRevenueChart",
+  async (days = 30, { rejectWithValue }) => {
+    try {
+      const { data } = await api.get(`/admin/revenue-chart?days=${days}`);
+      console.log("📊 Revenue Chart data loaded:", data.length, "days");
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 
 const fetchTransactionStats = createAsyncThunk(
   "admin/fetchTransactionStats",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await api.get("/admin/transactions");
-      console.log(data);
+      const { data } = await api.get("/admin/transaction-stats");
+      console.log("Transaction stats:", data);
       
-      return data.data;
+      return data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -331,13 +347,35 @@ const adminSlice = createSlice({
 });
 
     // coaches & gyms
-    builder.addCase(fetchCoaches.fulfilled, (s, a) => {
-      s.coaches = a.payload;
-    });
-    builder.addCase(fetchGyms.fulfilled, (s, a) => {
-      console.log(a.payload)
-      s.gyms = a.payload;
-    });
+    builder
+      .addCase(fetchCoaches.pending, (s) => {
+        s.loading = true;
+        s.error = null;
+      })
+      .addCase(fetchCoaches.fulfilled, (s, a) => {
+        s.loading = false;
+        s.coaches = a.payload;
+      })
+      .addCase(fetchCoaches.rejected, (s, a) => {
+        s.loading = false;
+        s.error = a.payload;
+      });
+    
+    // gyms
+    builder
+      .addCase(fetchGyms.pending, (s) => {
+        s.loading = true;
+        s.error = null;
+      })
+      .addCase(fetchGyms.fulfilled, (s, a) => {
+        s.loading = false;
+        console.log(a.payload);
+        s.gyms = a.payload;
+      })
+      .addCase(fetchGyms.rejected, (s, a) => {
+        s.loading = false;
+        s.error = a.payload;
+      });
 
     // stats
     builder
@@ -377,9 +415,14 @@ const adminSlice = createSlice({
 .addCase(fetchDashboardStats.fulfilled, (s,a) => {
   s.stats =a.payload;
 })
-// .addCase(fetchRevenueChart.fulfilled, (s,a) => {
-//   s.revenueChart =a.payload;
-// })
+.addCase(fetchRevenueChart.fulfilled, (s,a) => {
+  s.revenueChart = a.payload;
+  console.log("✅ Revenue chart loaded:", a.payload.length, "data points");
+})
+.addCase(fetchRevenueChart.rejected, (s, a) => {
+  s.error = a.payload;
+  console.error("❌ Failed to load revenue chart:", a.payload);
+})
 
 .addCase(fetchRoleDistribution.fulfilled, (s,a) => {
   s.roleDistribution =a.payload;
@@ -399,11 +442,11 @@ const adminSlice = createSlice({
 })
 .addCase(fetchTransactionStats.fulfilled, (s, a) => {
   s.loading = false;
-  console.log("dd",a.payload);
+  console.log("Transaction stats received:", a.payload);
   
-  // s.revenueChart = a.payload.revenueChart;
-  // s.recentTransactions = a.payload.recentTransactions;
-  // s.transactionStats = a.payload.stats;
+  // Stocker les statistiques et les transactions récentes
+  s.stats = a.payload.stats;
+  s.recentTransactions = a.payload.recentTransactions;
   s.error = null;
 })
 .addCase(fetchTransactionStats.rejected, (s, a) => {
@@ -435,7 +478,7 @@ export {
   rejectCoach,
   deleteGym,
   fetchDashboardStats,
-
+  fetchRevenueChart,
   fetchRoleDistribution,
   fetchLastTransactions,
   fetchBestPrograms,

@@ -48,7 +48,7 @@ export default function Statistics() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Nouveaux Clients</p>
-              <p className="text-xl font-semibold text-gray-900">{stats.transactionCount}</p>
+              <p className="text-xl font-semibold text-gray-900">{stats.newClients || 0}</p>
             </div>
           </div>
         </Card>
@@ -59,8 +59,8 @@ export default function Statistics() {
               <DollarSign className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Revenu Journalier</p>
-              <p className="text-xl font-semibold text-gray-900">{stats.dailyRevenue} MAD</p>
+              <p className="text-sm text-gray-500">Revenue Journalier</p>
+              <p className="text-xl font-semibold text-gray-900">{stats.dailyRevenue || 0} MAD</p>
             </div>
           </div>
         </Card>
@@ -72,7 +72,7 @@ export default function Statistics() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Croissance Mensuelle</p>
-              <p className="text-xl font-semibold text-gray-900">+{stats.monthlyGrowth}%</p>
+              <p className="text-xl font-semibold text-gray-900">{stats.monthlyGrowth >= 0 ? '+' : ''}{stats.monthlyGrowth || 0}%</p>
             </div>
           </div>
         </Card>
@@ -84,7 +84,7 @@ export default function Statistics() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Revenue Total</p>
-              <p className="text-xl font-semibold text-gray-900">{stats.totalRevenue} MAD</p>
+              <p className="text-xl font-semibold text-gray-900">{stats.totalRevenue || 0} MAD</p>
             </div>
           </div>
         </Card>
