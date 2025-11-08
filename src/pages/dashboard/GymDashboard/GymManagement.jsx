@@ -75,7 +75,8 @@ export default function GymManagement({ gym, onGymUpdate }) {
   const [equipmentSearchTerm, setEquipmentSearchTerm] = useState('');
   const [equipmentFilterType, setEquipmentFilterType] = useState('All'); // Default filter
   const [customEquipmentModalOpen, setCustomEquipmentModalOpen] = useState(false); // State for custom equipment dialog
-  const [newCustomEquipment, setNewCustomEquipment] = useState({ title: '', picture: '', details: '', type: '' });
+  const [newCustomEquipment, setNewCustomEquipment] = useState({ title: '', pictureFile: null, details: '', type: '' }); // Changed: pictureFile is now a File object
+  const [customEquipmentPicturePreview, setCustomEquipmentPicturePreview] = useState(''); // Optional: for image preview
 
   // Get unique types for filter dropdown
   const equipmentTypes = ['All', ...new Set(EQUIPMENT_CATALOG.map(item => item.type).filter(Boolean))];
@@ -116,24 +117,66 @@ export default function GymManagement({ gym, onGymUpdate }) {
     }));
   };
 
-  const addCustomEquipment = () => {
-    if (newCustomEquipment.title && newCustomEquipment.picture) {
-      const customEquipment = {
-        title: newCustomEquipment.title,
-        picture: newCustomEquipment.picture,
-        details: newCustomEquipment.details,
-        type: newCustomEquipment.type
-      };
-      setFormData(prev => ({
-        ...prev,
-        equipements: [...prev.equipements, customEquipment]
-      }));
-      setNewCustomEquipment({ title: '', picture: '', details: '', type: '' });
-      setCustomEquipmentModalOpen(false); // Close the modal after adding
+  // --- CHANGED: Handle custom equipment picture file selection ---
+  const handleCustomEquipmentPictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewCustomEquipment(prev => ({ ...prev, pictureFile: file }));
+      // Optional: Create a preview URL
+      setCustomEquipmentPicturePreview(URL.createObjectURL(file));
     } else {
-      alert("Please fill in the title and picture for the custom equipment.");
+      setNewCustomEquipment(prev => ({ ...prev, pictureFile: null }));
+      setCustomEquipmentPicturePreview('');
     }
   };
+
+  // --- CHANGED: Updated addCustomEquipment function ---
+  const addCustomEquipment = async () => {
+    if (!newCustomEquipment.title || !newCustomEquipment.pictureFile) {
+      toast.error("Please fill in the title and select a picture for the custom equipment.");
+      return;
+    }
+
+    const formDataToSend = new FormData();
+    formDataToSend.append('title', newCustomEquipment.title);
+    formDataToSend.append('picture', newCustomEquipment.pictureFile); // Append the File object
+    if (newCustomEquipment.details) {
+      formDataToSend.append('details', newCustomEquipment.details);
+    }
+    if (newCustomEquipment.type) {
+      formDataToSend.append('type', newCustomEquipment.type);
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/equipment/custom', { // Use your new backend endpoint
+        method: 'POST',
+        body: formDataToSend,
+        // Do NOT set Content-Type — browser handles it
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to upload custom equipment picture.');
+      }
+
+      const customEquipmentWithUrl = await response.json(); // Backend returns { title, picture, details, type }
+
+      setFormData(prev => ({
+        ...prev,
+        equipements: [...prev.equipements, customEquipmentWithUrl] // Add the object with Cloudinary URL
+      }));
+
+      // Reset form and close modal
+      setNewCustomEquipment({ title: '', pictureFile: null, details: '', type: '' });
+      setCustomEquipmentPicturePreview('');
+      setCustomEquipmentModalOpen(false);
+      toast.success('Custom equipment added successfully!');
+    } catch (error) {
+      console.error('Add custom equipment error:', error);
+      toast.error(error.message || 'An error occurred while adding custom equipment.');
+    }
+  };
+  // --- END CHANGED ---
 
   // --- END ADDED ---
 
@@ -422,12 +465,12 @@ export default function GymManagement({ gym, onGymUpdate }) {
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    {/* --- CORRECTED DIALOG STRUCTURE --- */}
+                    {/* --- REMOVED DialogHeader --- */}
                     <DialogTitle>Add Custom Equipment</DialogTitle>
                     <DialogDescription>
-                      Enter the details for the equipment not found in the catalog.
+                      Enter the details for the equipment not found in the catalog. Upload an image.
                     </DialogDescription>
-                    {/* --- END CORRECTED DIALOG STRUCTURE --- */}
+                    {/* --- END REMOVED --- */}
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="custom-title">Title *</Label>
@@ -438,15 +481,29 @@ export default function GymManagement({ gym, onGymUpdate }) {
                           placeholder="e.g., Smith Machine Pro"
                         />
                       </div>
+                      {/* --- CHANGED: Replace Image URL input with File input --- */}
                       <div className="space-y-2">
-                        <Label htmlFor="custom-picture">Image URL *</Label>
+                        <Label htmlFor="custom-picture-file">Picture *</Label>
                         <Input
-                          id="custom-picture"
-                          value={newCustomEquipment.picture}
-                          onChange={(e) => setNewCustomEquipment(prev => ({ ...prev, picture: e.target.value }))}
-                          placeholder="https://example.com/equipment-image.jpg"
+                          id="custom-picture-file"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCustomEquipmentPictureChange}
                         />
+                        {/* Optional: Show selected file name or preview */}
+                        {newCustomEquipment.pictureFile && (
+                          <div className="text-sm text-slate-500 truncate">Selected: {newCustomEquipment.pictureFile.name}</div>
+                        )}
+                        {/* Optional: Preview the image */}
+                        {customEquipmentPicturePreview && (
+                          <img
+                            src={customEquipmentPicturePreview}
+                            alt="Preview"
+                            className="w-20 h-20 object-cover rounded border"
+                          />
+                        )}
                       </div>
+                      {/* --- END CHANGED --- */}
                       <div className="space-y-2">
                         <Label htmlFor="custom-details">Details (optional)</Label>
                         <Textarea
@@ -473,7 +530,8 @@ export default function GymManagement({ gym, onGymUpdate }) {
                         variant="outline"
                         onClick={() => {
                           setCustomEquipmentModalOpen(false);
-                          setNewCustomEquipment({ title: '', picture: '', details: '', type: '' }); // Reset form on close
+                          setNewCustomEquipment({ title: '', pictureFile: null, details: '', type: '' }); // Reset form on close
+                          setCustomEquipmentPicturePreview(''); // Clear preview
                         }}
                       >
                         Cancel
