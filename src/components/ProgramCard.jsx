@@ -1,85 +1,105 @@
-  import { Users, TrendingUp, Download } from "lucide-react";
-  import React, { useMemo, useState } from "react";
-  import { useSelector } from "react-redux";
-  import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-  import { Badge } from "@/components/ui/badge";
-  import { Button } from "@/components/ui/button";
-  import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-  import { Link } from "react-router-dom";
-  import placeHolder from '@/public/images/program-placeholder.png'
-  import { toast } from "sonner";
-  import api from "@/services/api";
+import { Users, TrendingUp, Download } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
+import placeHolder from "@/public/images/program-placeholder.png";
+import { toast } from "sonner";
+import api from "@/services/api";
 
-  console.log(placeHolder)
-  const ProgramCard = ({ program, showUpdateForm, updateProgram, deleteProgram }) => {
-    const [isDownloading, setIsDownloading] = useState(false);
-    const [loginDialogOpen, setLoginDialogOpen] = useState(false);
-    const user = useSelector((s) => s.auth.user);
+const ProgramCard = ({
+  program,
+  showUpdateForm,
+  updateProgram,
+  deleteProgram,
+}) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const user = useSelector((s) => s.auth.user);
 
-    const programId = useMemo(() => program?._id || program?.id, [program]);
-    const isOwned = useMemo(() => {
-      const uid = user?._id || user?.id;
-      if (!uid) return false;
-      const buyers = program?.bought_by || [];
-      return buyers.some((b) => (b?._id || b?.id || b) === uid);
-    }, [program, user]);
+  const programId = useMemo(() => program?._id || program?.id, [program]);
+  const isOwned = useMemo(() => {
+    const uid = user?._id || user?.id;
+    if (!uid) return false;
+    const buyers = program?.bought_by || [];
+    return buyers.some((b) => (b?._id || b?.id || b) === uid);
+  }, [program, user]);
 
-    const handleBuy = () => {
-      if (!programId) return;
-      const role = (user?.role || "").toLowerCase();
-      if (!user) {
-        setLoginDialogOpen(true);
-        return;
-      }
-      if (role !== "athlete") {
-        toast.error("Only athletes can purchase programs");
-        return;
-      }
-      const base = api.defaults.baseURL?.replace(/\/$/, "") || "";
-      window.location.href = `${base}/payments/programs/${programId}/checkout`;
-    };
+  const handleBuy = async (programId) => {
+    if (!programId) return;
+    const role = (user?.role || "").toLowerCase();
+    if (!user) {
+      setLoginDialogOpen(true);
+      return;
+    }
+    // if (role !== "athlete") {
+    //   toast.error("Only athletes can purchase programs");
+    //   return;
+    // }
 
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    };
+    try {
+      
+      const res = await api.get(`/payments/programs/${programId}/checkout`);
+      console.log(res.data)
+      window.location.href = res.data.url;
 
-    const handleDownload = async () => {
-      const fileUrl = program.file;
-      if (!fileUrl) return;
+    } catch (error) {
+      console.log("erro " + error.message);
+      toast.error("Payment failed");
+    }
+  };
 
-      setIsDownloading(true);
-      try {
-        const response = await fetch(fileUrl);
-        if (!response.ok) throw new Error("Failed to fetch file");
-        
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = program.title ? `${program.title}.pdf` : "program.pdf";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        window.URL.revokeObjectURL(blobUrl);
-        
-        toast.success("Program file downloaded successfully");
-      } catch (error) {
-        console.error("Error downloading file:", error);
-        toast.error("Failed to download program file");
-      } finally {
-        setIsDownloading(false);
-      }
-    };
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
-    return (
-      <>
+  const handleDownload = async () => {
+    const fileUrl = program.file;
+    if (!fileUrl) return;
+
+    setIsDownloading(true);
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error("Failed to fetch file");
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = program.title ? `${program.title}.pdf` : "program.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(blobUrl);
+
+      toast.success("Program file downloaded successfully");
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download program file");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  return (
+    <>
       <div className="group relative flex flex-col rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 hover:-translate-y-1 max-w-sm border bg-card text-card-foreground dark:bg-neutral-900 dark:text-white border-border dark:border-neutral-800">
         <div className="relative w-full h-64 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -219,31 +239,35 @@
             </Button>
           ) : (
             <Button
-              onClick={handleBuy}
+              onClick={() => handleBuy(program._id)}
               className="w-full h-11 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
             >
               Buy Program
             </Button>
           )}
         </div>
-    </div>
-    {/* Auth required dialog */}
-    <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Sign in required</DialogTitle>
-          <DialogDescription>
-            You need to register or log in before purchasing a program.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <div className="flex gap-2 justify-end w-full">
-            <Button asChild variant="outline"><Link to="/register">Register</Link></Button>
-            <Button asChild><Link to="/login">Log in</Link></Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </div>
+      {/* Auth required dialog */}
+      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign in required</DialogTitle>
+            <DialogDescription>
+              You need to register or log in before purchasing a program.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <div className="flex gap-2 justify-end w-full">
+              <Button asChild variant="outline">
+                <Link to="/register">Register</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/login">Log in</Link>
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
