@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import api from "@/services/axios/axiosClient";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useDispatch } from "react-redux";
 import { setToken, setUser } from "@/services/redux/slices/authSlice";
 
+const apiOrigin = (import.meta.env.VITE_API_ORIGIN || "http://localhost:5000").replace(/\/$/, "");
+
 export function LoginForm({ className /* , ...props */ }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -40,8 +42,8 @@ export function LoginForm({ className /* , ...props */ }) {
 
     try {
       // Send credentials to backend
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_ORIGIN}/api/auth/login`,
+      const response = await api.post(
+        "/api/auth/login",
         { email, password },
         { withCredentials: true } //  allow backend to set HttpOnly cookie
       );
@@ -111,7 +113,7 @@ export function LoginForm({ className /* , ...props */ }) {
                 </Button>
                 <Button variant="outline" asChild>
                   <a
-                    href={`${import.meta.env.VITE_API_ORIGIN}/api/auth/google`}
+                    href={`${apiOrigin}/api/auth/google`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                       <path

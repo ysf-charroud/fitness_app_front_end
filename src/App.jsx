@@ -2,7 +2,7 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import router from "./router";
 import { RouterProvider } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUser } from "./services/redux/slices/authSlice";
+import { fetchUser, resetAuth, hasStoredSession } from "./services/redux/slices/authSlice";
 
 // Lazy load the loader component
 const ClimbingBoxLoader = lazy(() =>
@@ -12,6 +12,7 @@ const ClimbingBoxLoader = lazy(() =>
 const App = () => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.isLoading);
+  const hydrated = useSelector((state) => state.auth.hydrated);
   // const token = useSelector((state) => state.auth.token);
 
   const [delayPassed, setDelayPassed] = useState(false);
@@ -25,12 +26,14 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    // if (token) {
+    if (hasStoredSession()) {
       dispatch(fetchUser());
-    // }
+    } else {
+      dispatch(resetAuth());
+    }
   }, [dispatch]);
 
-  if (loading || !delayPassed) {
+  if (!hydrated || loading || !delayPassed) {
     return (
       <Suspense fallback={null}>
       <div className="h-screen flex justify-center items-center">

@@ -8,8 +8,10 @@ import ContactForm from '@/components/ContactForm';
 
 const Header = () => {
   const user = useSelector((s) => s.auth.user);
+  const token = useSelector((s) => s.auth.token);
   const location = useLocation();
   const [showContactDialog, setShowContactDialog] = useState(false);
+  const isAuthenticated = Boolean(user && token);
 
   useEffect(() => {
     setShowContactDialog(false);
@@ -84,7 +86,7 @@ const Header = () => {
 
             {/* User / Auth buttons */}
             <div className="flex items-center gap-4">
-              {user ? (
+              {isAuthenticated ? (
                 <Profile />
               ) : (
                 <>

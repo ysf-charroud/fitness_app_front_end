@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser, setToken, fetchUser } from "@/services/redux/slices/authSlice";
 import api from "@/services/axios/axiosClient";
+import Header from "@/components/Header";
 import {
   Card,
   CardContent,
@@ -48,11 +49,19 @@ function ProfilePage() {
   const dispatch = useDispatch();
   const userFromRedux = useSelector((state) => state.auth.user);
   const token = useSelector((state) => state.auth.token);
+  const hydrated = useSelector((state) => state.auth.hydrated);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const userId = userFromRedux?._id || userFromRedux?.id || "";
   const role = (userFromRedux?.role || "").toLowerCase();
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!token || !userFromRedux) {
+      navigate("/login", { replace: true });
+    }
+  }, [hydrated, token, userFromRedux, navigate]);
 
   // Helpers
   const emptyProfile = { bio: "", phone: "", address: "", social_links: { instagram: "", linkedin: "" } };
@@ -347,10 +356,27 @@ function ProfilePage() {
     }
   };
 
+  if (!hydrated) {
+    return null;
+  }
+
+  if (!token || !userFromRedux) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-100 px-4 py-10 flex items-center justify-center">
+          <p className="text-slate-600 text-sm sm:text-base">Redirecting to login...</p>
+        </div>
+      </>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-100 px-4 py-10">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:flex-row">
-        <Card className="sticky top-24 h-fit flex-1 border-transparent bg-white/80 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-100 px-4 pb-10 pt-28">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:flex-row">
+          <Card className="sticky top-24 h-fit flex-1 border-transparent bg-white/80 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-white/60">
           <CardHeader className="space-y-4">
             <div className="relative mx-auto h-36 w-36 overflow-hidden rounded-full border border-dashed border-primary/30">
               <Avatar className="h-full w-full">
@@ -808,6 +834,7 @@ function ProfilePage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

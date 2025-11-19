@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { LoginForm } from "@/components/login-form";
 import api from "@/services/axios/axiosClient";
+import { useSelector } from "react-redux";
 
 function Login() {
   const navigate = useNavigate(); 
+  const user = useSelector((state) => state.auth.user);
+  const token = useSelector((state) => state.auth.token);
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [serverErrors, setServerErrors] = useState([]);
@@ -66,6 +69,10 @@ function Login() {
       setLoading(false);
     }
   };
+
+  if (user && token) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-50">

@@ -1,53 +1,39 @@
 import api from "@/services/axios/axiosClient";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-// Helpers to persist auth across refreshes
-const readJSON = (key) => {
+const SESSION_FLAG_KEY = "fitness_has_refresh_token";
+
+const setSessionFlag = (value) => {
+  if (typeof window === "undefined") return;
   try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  } catch (_) {
-    return null;
-  }
-};
-const writeJSON = (key, value) => {
-  try {
-    if (value === null || value === undefined) localStorage.removeItem(key);
-    else localStorage.setItem(key, JSON.stringify(value));
+    if (value) sessionStorage.setItem(SESSION_FLAG_KEY, "true");
+    else sessionStorage.removeItem(SESSION_FLAG_KEY);
   } catch (_) {}
 };
-const readString = (key) => {
+
+export const hasStoredSession = () => {
+  if (typeof window === "undefined") return false;
   try {
-    return localStorage.getItem(key);
+    return sessionStorage.getItem(SESSION_FLAG_KEY) === "true";
   } catch (_) {
-    return null;
+    return false;
   }
-};
-const writeString = (key, value) => {
-  try {
-    if (!value) localStorage.removeItem(key);
-    else localStorage.setItem(key, value);
-  } catch (_) {}
 };
 
 export const fetchUser = createAsyncThunk(
   "auth/fetchUser",
-  async (_,{dispatch,thunkAPI}) => {
+  async (_, { dispatch, thunkAPI }) => {
     try {
       const response = await api.get("/api/auth/me", { withCredentials: true });
       const userData = response.data;
-      writeJSON("auth_user", userData);
-       if (userData.token) {
-        writeString("auth_token", userData.token);
-        dispatch(setToken(userData.token)); // Mets à jour le state Redux
+      if (userData?.token) {
+        dispatch(setToken(userData.token));
       }
-
-
-
       return userData;
     } catch (error) {
       const status = error?.response?.status;
-      const message =error?.response?.data?.message || error?.message || "Failed to fetch user data";
+      const message =
+        error?.response?.data?.message || error?.message || "Failed to fetch user data";
       return thunkAPI.rejectWithValue({ status, message });
     }
   }
@@ -56,40 +42,42 @@ export const fetchUser = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: readJSON("auth_user"),
-    token: readString("auth_token"),
+    user: null,
+    token: null,
     isLoading: false,
     error: null,
+    hydrated: false,
   },
   reducers: {
     setUser: (state, action) => {
       state.user = action.payload;
-      writeJSON("auth_user", action.payload || null);
+      state.hydrated = true;
+      setSessionFlag(Boolean(action.payload));
     },
     setToken: (state, action) => {
       state.token = action.payload;
-      writeString("auth_token", action.payload || "");
     },
     resetAuth: (state) => {
       state.user = null;
       state.token = null;
       state.isLoading = false;
       state.error = null;
-      writeJSON("auth_user", null);
-      writeString("auth_token", "");
+      state.hydrated = true;
+      setSessionFlag(false);
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchUser.pending, (state) => {
-          state.isLoading = true;
+        state.isLoading = true;
         state.error = null;
       })
       .addCase(fetchUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
         state.error = null;
-        writeJSON("auth_user", action.payload || null);
+        state.hydrated = true;
+        setSessionFlag(true);
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -98,9 +86,9 @@ const authSlice = createSlice({
         if (payload?.status === 401) {
           state.user = null;
           state.token = null;
-          writeJSON("auth_user", null);
-          writeString("auth_token", "");
+          setSessionFlag(false);
         }
+        state.hydrated = true;
       });
   },
 });

@@ -2,8 +2,10 @@ import axios from "axios";
 import store from "../redux/store";
 import { setToken, resetAuth } from "../redux/slices/authSlice";
 
+const apiOrigin = (import.meta.env.VITE_API_ORIGIN || "http://localhost:5000").replace(/\/$/, "");
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_ORIGIN,
+  baseURL: apiOrigin,
   headers: {
     "Content-Type": "application/json",
   },
